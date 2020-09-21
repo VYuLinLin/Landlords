@@ -50,7 +50,7 @@ const CardsValue = {
   },
 };
 const defines = {
-  serverUrl: 'http://localhost:3000',
+  serverUrl: 'http://localhost:8528',
   jdRoomConfig: {
     'rate_1': {
       needCostGold: 10,

@@ -4,6 +4,7 @@ import eventlister from "./util/event_lister.js"
 
 const myglobal = {} || myglobal
 myglobal.socket = socketctr()
+myglobal.socket.initSocket()
 myglobal.playerData = playerdata()
 myglobal.eventlister = eventlister({})
 

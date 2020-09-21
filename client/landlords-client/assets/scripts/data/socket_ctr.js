@@ -20,6 +20,7 @@ const socketCtr = function(){
   
         
     that.initSocket = function(){
+        if (!cc.sys.isBrowser) return
         var opts = {
             'reconnection':false,
             'force new connection': true,
@@ -55,6 +56,10 @@ const socketCtr = function(){
 
         })
 
+    }
+
+    that.request_login = function(req,callback){
+        _request("login",req,callback)
     }
 
     that.request_wxLogin = function(req,callback){
