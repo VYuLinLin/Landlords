@@ -12,5 +12,12 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
+client/landlords-client/build
+client/landlords-client/temp
+client/landlords-client/library
+client/landlords-client/packages
+client/landlords-client/local
+client/landlords-client/dist
+
 server/pkg/
 server/landlords/vendor/
