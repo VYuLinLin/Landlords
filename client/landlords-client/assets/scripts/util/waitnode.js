@@ -17,7 +17,7 @@ cc.Class({
     },
 
     update (dt) {
-        this.loadimage_target.rotation = this.loadimage_target.rotation - dt*45;
+        this.loadimage_target.angle = this.loadimage_target.angle - dt*45;
     },
 
     //content为label显示的内容
