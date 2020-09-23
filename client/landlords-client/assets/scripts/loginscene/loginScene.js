@@ -41,17 +41,26 @@ cc.Class({
         break
       case 'guest_login':
         this.wait_node.active = true
-        const count = Math.floor(Math.random() * 100000)
-        const userName = `guest_${count}`
-        myglobal.playerData.userId = `${count}`
-        myglobal.playerData.userName = userName
-        cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
-        cc.director.loadScene("hallScene")
+        myglobal.socket.request_login({isGuest: 1}, function(status, res) {
+          if (status) {
+            console.log("err:" + status+res)
+            return
+          }
+          console.log(res)
+          const {userId, userName} = res
+          myglobal.playerData.userId = userId
+          myglobal.playerData.userName = `${userName}_${userId}`
+          cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
+          cc.director.loadScene("hallScene")
+        }.bind(this))
+        // const count = Math.floor(Math.random() * 100000)
+        // const userName = `guest_${count}`
+        // myglobal.playerData.userId = `${count}`
+        // myglobal.playerData.userName = userName
+        // cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
+        // cc.director.loadScene("hallScene")
       default:
         break
     }
   }
-  // update (dt) {},
-
-
 });

@@ -2,7 +2,7 @@ import socketctr from "./data/socket_ctr.js"
 import playerdata from "./data/player.js"
 import eventlister from "./util/event_lister.js"
 
-const myglobal = {} || myglobal
+const myglobal = myglobal || {}
 myglobal.socket = socketctr()
 myglobal.socket.initSocket()
 myglobal.playerData = playerdata()
