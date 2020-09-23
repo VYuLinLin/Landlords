@@ -53,8 +53,12 @@ func init() {
 			status = 4
 			data["data"] = "请求错误"
 		} else {
-			if msgType == "login" {
-				data["data"] = api.Login(msg["data"])
+			var p = msg["data"]
+			switch msgType {
+			case "login":
+				data["data"] = api.Login(p)
+			case "createroom":
+				data["data"] = api.CreateRoom(p)
 			}
 		}
 		data["status"] = status

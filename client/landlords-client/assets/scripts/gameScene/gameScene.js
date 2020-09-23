@@ -24,12 +24,13 @@ cc.Class({
       ddzData.gameStateNotify.addListener(this.gameStateHandler, this)
     }
     this.playerNodeList = []
-    const { roomId } = myglobal.playerData
-    const [rate, bottom] = roomId.split('_')
-    myglobal.playerData.rate = rate
-    myglobal.playerData.bottom = bottom
+    const { roomId, roomName, rate, bottom } = myglobal.playerData
+    // const [rate, bottom] = roomId.split('_')
+    // myglobal.playerData.rate = rate
+    // myglobal.playerData.bottom = bottom
 
-    this.roomid_label.string = defines.roomNames[rate - 1]
+    this.roomid_label.string = roomName
+    // this.roomid_label.string = defines.roomNames[rate - 1]
     this.beishu_label.string = "倍数：" + rate
     this.di_label.string = "底：" + bottom
     console.log('重新开始', ddzData.gameState)

@@ -61,7 +61,7 @@ const socketCtr = function () {
     }
 
     that.request_creatroom = function (req, callback) {
-        _request("createroom_req", req, callback)
+        _request("createroom", req, callback)
     }
 
     that.request_jion = function (req, callback) {

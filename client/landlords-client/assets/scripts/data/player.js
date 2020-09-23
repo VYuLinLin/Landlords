@@ -13,6 +13,7 @@ const playerData = function () {
     userId: '', // 用户id
     userName: '', // 用户名称，guest_ 开头
     roomId: '',// 游戏房间id
+    roomName: '',
     seatindex: 0, // 作为id
     avatarUrl: 'avatar_1', // 头像
     goldcount: 10000, // 金额
