@@ -9,6 +9,7 @@ cc.Class({
     gobal_count: cc.Label,
     creatroom_prefabs: cc.Prefab,
     joinroom_prefabs: cc.Prefab,
+    moreTip: cc.Node,
   },
 
   // LIFE-CYCLE CALLBACKS:
@@ -46,6 +47,6 @@ cc.Class({
     creator_Room.zIndex = 100
   },
   onBtnLaizi() {
-    alert('暂未开放')
+    this.moreTip.active = !this.moreTip.active
   }
 });

@@ -3,7 +3,8 @@ cc.Class({
   extends: cc.Component,
 
   properties: {
-    wait_node: cc.Node
+    wait_node: cc.Node,
+    protocaolNode: cc.Node
   },
 
   // LIFE-CYCLE CALLBACKS:
@@ -13,7 +14,16 @@ cc.Class({
   },
 
   start() {},
+  // 确认协议
+  confirmProtocol() {
+    this.protocaolNode.children[0].active = !this.protocaolNode.children[0].active
+  },
   onButtonCilck(event, customData) {
+    if (!this.protocaolNode.children[0].active) {
+      const anim = this.protocaolNode.getComponent(cc.Animation)
+      anim.play('scale')
+      return
+    }
     switch (customData) {
       case "wx_login":
         console.log("wx_login request")
