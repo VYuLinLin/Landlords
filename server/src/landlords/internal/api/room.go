@@ -27,10 +27,16 @@ func CreateRoom(p interface{}) (d Msgs) {
 	// userId := m["userId"].(int)
 	level, _ := strconv.Atoi(roomLevel)
 	rand.Seed(time.Now().Unix())
+	var roots = new([2]Msgs)
+	roots[0] = NewUser("guest")
+	roots[1] = NewUser("guest")
+
 	d["id"] = rand.Intn(100000)
 	d["name"] = rooms[roomLevel]
 	d["rate"] = level
 	d["bottom"] = level * 10
+	d["roots"] = roots
+
 	fmt.Println(d)
 	return d
 }

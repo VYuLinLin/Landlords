@@ -3,6 +3,6 @@ module landlords
 go 1.15
 
 require (
-	github.com/gogf/gf v1.13.6
+	github.com/go-sql-driver/mysql v1.5.0
 	github.com/googollee/go-socket.io v1.4.4
 )

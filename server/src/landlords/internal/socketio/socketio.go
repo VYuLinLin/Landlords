@@ -41,7 +41,7 @@ func init() {
 
 	server.OnEvent("/", "notify", func(s socketio.Conn, msg Msgs) {
 		var (
-			status   = 0
+			status   = 1
 			msgIndex = msg["msgIndex"]
 			msgType  = msg["msgType"]
 			data     = make(Msgs)
@@ -50,13 +50,24 @@ func init() {
 		fmt.Println("notify:", msg)
 
 		if len(msgType.(string)) == 0 {
-			status = 4
+			fmt.Println(msgType)
+			status = 0
 			data["data"] = "请求错误"
 		} else {
 			var p = msg["data"]
 			switch msgType {
+			case "register":
+				data["data"], err = api.Register(p)
+				if err != nil {
+					status = 0
+					data["data"] = err.Error()
+				}
 			case "login":
-				data["data"] = api.Login(p)
+				data["data"], err = api.Login(p)
+				if err != nil {
+					status = 0
+					data["data"] = err.Error()
+				}
 			case "createroom":
 				data["data"] = api.CreateRoom(p)
 			}
@@ -65,7 +76,7 @@ func init() {
 		data["msgType"] = msgType
 		data["msgIndex"] = msgIndex
 
-		fmt.Println(data)
+		fmt.Println("emit notify: ", data)
 		s.Emit("notify", data)
 	})
 
