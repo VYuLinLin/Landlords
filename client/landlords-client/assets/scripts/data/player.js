@@ -17,10 +17,11 @@ const playerData = function () {
     seatindex: 0, // 作为id
     avatarUrl: 'avatar_1', // 头像
     goldcount: 10000, // 金额
-    rootList: [
-      { seatindex: 1, userId: rootId1, userName: `guest_${rootId1}`, "avatarUrl": "avatar_2", "goldcount": getRandomStr(4) },
-      { seatindex: 2, userId: rootId2, userName: `guest_${rootId2}`, "avatarUrl": "avatar_3", "goldcount": getRandomStr(4) }
-    ],
+    roots: [],
+    // rootList: [
+    //   { seatindex: 1, userId: rootId1, userName: `guest_${rootId1}`, "avatarUrl": "avatar_2", "goldcount": getRandomStr(4) },
+    //   { seatindex: 2, userId: rootId2, userName: `guest_${rootId2}`, "avatarUrl": "avatar_3", "goldcount": getRandomStr(4) }
+    // ],
     masterUserId: '', // 地主id
   }
   // that.uniqueID = 1 + getRandomStr(6)

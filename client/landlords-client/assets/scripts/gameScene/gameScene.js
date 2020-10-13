@@ -24,13 +24,9 @@ cc.Class({
       ddzData.gameStateNotify.addListener(this.gameStateHandler, this)
     }
     this.playerNodeList = []
-    const { roomId, roomName, rate, bottom } = myglobal.playerData
-    // const [rate, bottom] = roomId.split('_')
-    // myglobal.playerData.rate = rate
-    // myglobal.playerData.bottom = bottom
+    const { roomId, roomName, rate, bottom, roots } = myglobal.playerData
 
     this.roomid_label.string = roomName
-    // this.roomid_label.string = defines.roomNames[rate - 1]
     this.beishu_label.string = "倍数：" + rate
     this.di_label.string = "底：" + bottom
     console.log('重新开始', ddzData.gameState)
@@ -39,9 +35,18 @@ cc.Class({
       cc.audioEngine.stopAll()
       cc.audioEngine.play(this.bjMusic, true)
     }
+    // 玩家
     this.addPlayerNode(myglobal.playerData)
-    this.addPlayerNode(myglobal.playerData.rootList[0])
-    this.addPlayerNode(myglobal.playerData.rootList[1])
+    // 机器人1
+    this.addPlayerNode({
+      ...roots[0],
+      seatindex: 1
+    })
+    // 机器人2
+    this.addPlayerNode({
+      ...roots[1],
+      seatindex: 2
+    })
     //监听，给其他玩家发牌(内部事件)
     this.node.on("pushcard_other_event", function () {
       console.log('其他玩家发牌')

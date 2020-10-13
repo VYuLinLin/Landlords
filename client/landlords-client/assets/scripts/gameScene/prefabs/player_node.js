@@ -119,7 +119,7 @@ cc.Class({
     //data:{"userId":"2117836","userName":"tiny543","avatarUrl":"http://xxx","goldcount":1000}
     this.userId = data.userId
     // this.account_label.string = data.accountid
-    this.nickname_label.string = data.userName
+    this.nickname_label.string = data.userName + '_' + data.userId
     this.globalcount_label.string = data.goldcount
     this.cardlist_node = []
     this.seat_index = index

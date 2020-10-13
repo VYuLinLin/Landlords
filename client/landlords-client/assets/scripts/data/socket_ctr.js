@@ -51,6 +51,9 @@ const socketCtr = function () {
         })
 
     }
+    that.request_register = function (req, callback) {
+        _request("register", req, callback)
+    }
 
     that.request_login = function (req, callback) {
         _request("login", req, callback)

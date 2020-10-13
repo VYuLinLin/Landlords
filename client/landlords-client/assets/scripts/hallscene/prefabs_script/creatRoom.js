@@ -13,13 +13,12 @@ cc.Class({
     }
     myglobal.socket.request_creatroom(data, function (err, res) {
       console.log("创建房间", res)
-      const {rate, bottom, id, name} = res
-      // const { bottom, rate } = defines.jdRoomConfig['rate_' + value]
-      // const roomId = `${rate}_${bottom}_${Math.floor(Math.random() * 1000)}`
+      const {rate, bottom, id, name, roots} = res
       myglobal.playerData.bottom = bottom
       myglobal.playerData.rate = rate
       myglobal.playerData.roomId = id
       myglobal.playerData.roomName = name
+      myglobal.playerData.roots = roots
       cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
       cc.director.loadScene("gameScene")
       this.node.destroy()

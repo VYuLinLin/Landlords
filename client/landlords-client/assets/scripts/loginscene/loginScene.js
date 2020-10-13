@@ -4,7 +4,9 @@ cc.Class({
 
   properties: {
     wait_node: cc.Node,
-    protocaolNode: cc.Node
+    protocaolNode: cc.Node,
+    loginPanel: cc.Node,
+    registerPanel: cc.Node
   },
 
   // LIFE-CYCLE CALLBACKS:
@@ -50,25 +52,11 @@ cc.Class({
         }.bind(this))
         break
       case 'guest_login':
-        this.wait_node.active = true
-        myglobal.socket.request_login({isGuest: 1}, function(status, res) {
-          if (status) {
-            console.log("err:" + status+res)
-            return
-          }
-          console.log(res)
-          const {userId, userName} = res
-          myglobal.playerData.userId = userId
-          myglobal.playerData.userName = `${userName}_${userId}`
-          cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
-          cc.director.loadScene("hallScene")
-        }.bind(this))
-        // const count = Math.floor(Math.random() * 100000)
-        // const userName = `guest_${count}`
-        // myglobal.playerData.userId = `${count}`
-        // myglobal.playerData.userName = userName
-        // cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
-        // cc.director.loadScene("hallScene")
+        this.loginPanel.active = true
+        break
+      case 'register':
+        this.registerPanel.active = true
+        break
       default:
         break
     }
