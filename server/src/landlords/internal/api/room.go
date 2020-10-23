@@ -2,6 +2,8 @@ package api
 
 import (
 	"fmt"
+	"landlords/internal/common"
+	"landlords/internal/mysql"
 	"math/rand"
 	"strconv"
 	"time"
@@ -20,16 +22,16 @@ var rooms = map[string]string{
 }
 
 // CreateRoom 创建房间
-func CreateRoom(p interface{}) (d Msgs) {
-	d = make(Msgs, 3)
+func CreateRoom(p interface{}) (d Msgs, err error) {
+	d = make(Msgs, 5)
 	m := p.(map[string]interface{})
 	roomLevel := m["roomLevel"].(string)
-	// userId := m["userId"].(int)
 	level, _ := strconv.Atoi(roomLevel)
 	rand.Seed(time.Now().Unix())
-	var roots = new([2]Msgs)
-	roots[0] = NewUser("guest")
-	roots[1] = NewUser("guest")
+	var roots = [2]common.User{
+		*NewUser("guest1"),
+		*NewUser("guest2"),
+	}
 
 	d["id"] = rand.Intn(100000)
 	d["name"] = rooms[roomLevel]
@@ -37,6 +39,7 @@ func CreateRoom(p interface{}) (d Msgs) {
 	d["bottom"] = level * 10
 	d["roots"] = roots
 
+	err = mysql.InsertRoom(d)
 	fmt.Println(d)
-	return d
+	return d, err
 }

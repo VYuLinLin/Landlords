@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"landlords/internal/common"
 	"landlords/internal/mysql"
 	"math/rand"
 	"time"
@@ -11,25 +12,26 @@ import (
 type Msgs map[string]interface{}
 
 // Register 注册接口
-func Register(p interface{}) (d Msgs, err error) {
+func Register(p interface{}) (d *common.User, err error) {
 	m := p.(map[string]interface{})
 	account := m["account"].(string)
 	password := m["password"].(string)
-	user, err := mysql.QueryOne(account)
+	user, err := mysql.QueryOneUser(account)
 
-	fmt.Println(*user)
+	fmt.Println("QueryOneUser", *user)
 	if err == nil {
 		err = fmt.Errorf("账户已注册")
 		return d, err
 	}
 	// 注册
 	d = NewUser(account)
-	mysql.InsertUser(d["userId"].(int), account, password)
+	fmt.Println("d", d)
+	mysql.InsertUser(d.UserID, account, password)
 	return d, nil
 }
 
 // Login 登录接口
-func Login(p interface{}) (d Msgs, err error) {
+func Login(p interface{}) (d *common.User, err error) {
 	m := p.(map[string]interface{})
 	isGuest := m["isGuest"]
 	_, is := isGuest.(float64)
@@ -41,19 +43,16 @@ func Login(p interface{}) (d Msgs, err error) {
 
 	if isGuest == 1 {
 		d = NewUser("guest")
-		mysql.InsertUser(d["userId"].(int), "guest", "")
+		mysql.InsertUser(d.UserID, "guest", "")
 	}
-	user, err := mysql.QueryOne(account)
+	user, err := mysql.QueryOneUser(account)
 	fmt.Println(*user)
 	if err != nil {
 		d = NewUser(account)
-		mysql.InsertUser(d["userId"].(int), account, password)
+		mysql.InsertUser(d.UserID, account, password)
 	} else {
-		d = make(Msgs, 3)
 		if password == user.PASSWORD {
-			d["userId"] = user.ID
-			d["userName"] = user.NAME
-			d["status"] = user.STATUS
+			d = &common.User{user.ID, user.NAME, user.STATUS}
 		} else {
 			err = fmt.Errorf("密码错误")
 		}
@@ -62,12 +61,9 @@ func Login(p interface{}) (d Msgs, err error) {
 }
 
 // NewUser 生成一个新玩家
-func NewUser(userName string) (d Msgs) {
-	rand.Seed(time.Now().Unix())
+func NewUser(userName string) *common.User {
+	time.Sleep(200) // 添加睡眠，避免同步调用时生成相同的id
+	rand.Seed(time.Now().UnixNano())
 	var id = rand.Intn(100000)
-	d = make(Msgs, 3)
-	d["userId"] = id
-	d["userName"] = userName
-	d["status"] = 1
-	return d
+	return &common.User{id, userName, 1}
 }

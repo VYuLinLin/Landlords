@@ -55,21 +55,20 @@ func init() {
 			data["data"] = "请求错误"
 		} else {
 			var p = msg["data"]
+			var err error
 			switch msgType {
 			case "register":
 				data["data"], err = api.Register(p)
-				if err != nil {
-					status = 0
-					data["data"] = err.Error()
-				}
 			case "login":
 				data["data"], err = api.Login(p)
-				if err != nil {
-					status = 0
-					data["data"] = err.Error()
-				}
 			case "createroom":
-				data["data"] = api.CreateRoom(p)
+				data["data"], err = api.CreateRoom(p)
+			case "startgame":
+				data["data"], err = api.CreateRoom(p)
+			}
+			if err != nil {
+				status = 0
+				data["data"] = err.Error()
 			}
 		}
 		data["status"] = status

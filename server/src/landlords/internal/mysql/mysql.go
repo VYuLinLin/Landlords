@@ -1,105 +1,25 @@
 package mysql
 
 import (
-	"database/sql"
 	"fmt"
-	"strings"
 	"time"
-
-	_ "github.com/go-sql-driver/mysql"
 )
-
-//数据库配置
-const (
-	userName = "root"
-	password = "121212"
-	ip       = "127.0.0.1"
-	port     = "3306"
-	dbName   = "landlords"
-)
-
-var (
-	db                = &sql.DB{}
-	err         error = nil
-	createTable       = `CREATE TABLE IF NOT EXISTS users(
-		id INT(10) PRIMARY KEY AUTO_INCREMENT NOT NULL,
-		name VARCHAR(64),
-		password VARCHAR(64),
-		score INT(5) DEFAULT 0,
-		status INT(4) DEFAULT 0,
-		createtime BIGINT DEFAULT 0
-		); `
-)
-
-type User struct {
-	ID         int64
-	NAME       string
-	PASSWORD   string
-	SCORE      int8
-	STATUS     int
-	CREATEDATE int64
-}
-
-func init() {
-	// 构建连接："用户名:密码@tcp(IP:端口)/数据库?charset=utf8"
-	path := strings.Join([]string{userName, ":", password, "@tcp(", ip, ":", port, ")/", dbName, "?charset=utf8"}, "")
-	fmt.Println("path", path)
-	// 打开数据库,前者是驱动名，所以要导入： _ "github.com/go-sql-driver/mysql"
-	db, _ = sql.Open("mysql", path)
-
-	// 设置数据库最大连接数
-	db.SetConnMaxLifetime(100)
-
-	// 设置数据库最大闲置连接数
-	db.SetMaxIdleConns(10)
-
-	// 验证连接
-	err = db.Ping()
-	errorHandler(err)
-
-	// 创建表
-	_, err := db.Exec(createTable)
-	if err == nil {
-		fmt.Println("create table users successd")
-		// 关闭数据库
-		// defer db.Close()
-	} else {
-		errorHandler(err)
-	}
-
-}
 
 func errorHandler(err error) {
 	if err != nil {
-		// fmt.Println(err.Error())
 		panic(err.Error())
 	}
 }
 
+/*
+ * Example
+ */
+
 var INSERT_DATA = `INSERT INTO users(id,name,password,createtime) VALUES(?,?,?,?);`
 
-// InsertUser 新增用户
-func InsertUser(id int, name, password string) {
-	println(id)
-	result, err := db.Exec(INSERT_DATA, id, name, password, int32(time.Now().Unix()))
-	if err != nil {
-		fmt.Printf("Insert data failed, err:%v \n", err)
-		return
-	}
-	// 获取插入数据的自增ID
-	lastInsertID, err := result.LastInsertId()
-	if err != nil {
-		fmt.Printf("Get insert id failed, err:%v \n", err)
-		return
-	}
-	fmt.Println("Insert data id:", lastInsertID)
-	// 通过RowsAffected获取受影响的行数
-	rowsaffected, err := result.RowsAffected()
-	if err != nil {
-		fmt.Printf("Get RowsAffected failed, err:%v \n", err)
-		return
-	}
-	fmt.Println("Affected rows:", rowsaffected)
+// InsertData 新增
+func InsertData(id int, name, password string) {
+	db.Exec(INSERT_DATA, id, name, password, int32(time.Now().Unix()))
 }
 
 var UPDATE_DATA = `UPDATE users SET score=28 WHERE name="唐僧";`
@@ -156,27 +76,4 @@ func Query(key string) {
 		}
 		fmt.Printf("%s is %d\n", name, score)
 	}
-}
-
-func main() {
-	// 建立数据连接
-	// db := setupConnect()
-	// 创建数据库表
-	// CreateTable(db, CREATE_TABLE)
-	// 插入数据
-	// Insert(db)
-	// // 查询数据
-	// Query(db)
-	// // 删除数据
-	// Delete(db)
-	// // 插入数据
-	// Insert(db)
-	// // 修改数据
-	// Update(db)
-	// // 查询数据
-	// Query(db)
-	// // 删除表
-	// DeleteTable(db)
-	// 关闭数据库连接
-	// db.Close()
 }
