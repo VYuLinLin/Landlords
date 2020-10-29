@@ -336,7 +336,7 @@
         1,
         1,
         1,
-        1
+        0
       ]
     },
     "_eulerAngles": {
@@ -628,7 +628,7 @@
       "array": [
         0,
         0,
-        366.3215640107885,
+        367.18757243634593,
         0,
         0,
         0,
@@ -837,6 +837,8 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
+    "_srcBlendFactor": 770,
+    "_dstBlendFactor": 771,
     "_useOriginalSize": false,
     "_string": "底: 0",
     "_N$string": "底: 0",
@@ -931,6 +933,8 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
+    "_srcBlendFactor": 770,
+    "_dstBlendFactor": 771,
     "_useOriginalSize": false,
     "_string": "倍数: 1",
     "_N$string": "倍数: 1",
@@ -1025,6 +1029,8 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
+    "_srcBlendFactor": 770,
+    "_dstBlendFactor": 771,
     "_useOriginalSize": false,
     "_string": "初级房",
     "_N$string": "初级房",
@@ -1088,7 +1094,6 @@
     },
     "_resize": 2,
     "_N$layoutType": 1,
-    "_N$padding": 0,
     "_N$cellSize": {
       "__type__": "cc.Size",
       "width": 40,
@@ -1871,6 +1876,8 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
+    "_srcBlendFactor": 770,
+    "_dstBlendFactor": 771,
     "_useOriginalSize": false,
     "_string": "",
     "_N$string": "",
@@ -3927,6 +3934,8 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
+    "_srcBlendFactor": 770,
+    "_dstBlendFactor": 771,
     "_useOriginalSize": false,
     "_string": "10",
     "_N$string": "10",
@@ -4371,6 +4380,8 @@
         "__uuid__": "eca5d2f2-8ef6-41c2-bbe6-f9c79d09c432"
       }
     ],
+    "_srcBlendFactor": 770,
+    "_dstBlendFactor": 771,
     "_useOriginalSize": false,
     "_string": "15",
     "_N$string": "15",
@@ -4924,7 +4935,7 @@
         1,
         1,
         1,
-        1
+        0
       ]
     },
     "_eulerAngles": {

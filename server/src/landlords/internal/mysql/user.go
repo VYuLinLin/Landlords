@@ -51,3 +51,11 @@ func QueryOneUser(account string) (user *User, err error) {
 	}
 	return user, err
 }
+
+var updateUserStatus = `UPDATE users SET score=28 WHERE name="唐僧";`
+
+// UpdateUserStatus 修改用户的游戏状态
+func UpdateUserStatus(status int) {
+	db.Exec(updateUserStatus)
+
+}

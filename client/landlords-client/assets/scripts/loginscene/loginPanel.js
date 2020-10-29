@@ -15,17 +15,7 @@ cc.Class({
         passwordTip: cc.Node,
         tip: cc.Prefab,
         wait: cc.Node,
-        // bar: {
-        //     get () {
-        //         return this._bar;
-        //     },
-        //     set (value) {
-        //         this._bar = value;
-        //     }
-        // },
     },
-
-    // LIFE-CYCLE CALLBACKS:
 
     // onLoad () {},
 
@@ -53,7 +43,6 @@ cc.Class({
         myglobal.socket[`request_${val}`](data, function(status, res) {
             this.wait.active = false
             if (!status) {
-            //   console.log("err:" + res)
               this.tipNode && this.tipNode.destroy()
               this.tipNode = cc.instantiate(this.tip)
               this.tipNode.getComponent(cc.Label).string = res
