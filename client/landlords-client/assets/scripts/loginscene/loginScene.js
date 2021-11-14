@@ -51,7 +51,7 @@ cc.Class({
           cc.director.loadScene("hallScene")
         }.bind(this))
         break
-      case 'guest_login':
+      case 'user_login':
         this.loginPanel.active = true
         break
       case 'register':

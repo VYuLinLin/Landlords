@@ -1137,7 +1137,7 @@
     "component": "",
     "_componentId": "b05a68gSOpBWr8ddvT03Jpj",
     "handler": "onButtonCilck",
-    "customEventData": "guest_login"
+    "customEventData": "user_login"
   },
   {
     "__type__": "cc.Widget",
@@ -1315,7 +1315,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "注 册",
     "_N$string": "注 册",
     "_fontSize": 22,
@@ -1853,7 +1852,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "登  录",
     "_N$string": "登  录",
     "_fontSize": 30,
@@ -2017,7 +2015,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "账号：",
     "_N$string": "账号：",
     "_fontSize": 30,
@@ -2312,7 +2309,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": true,
     "_string": "",
     "_N$string": "",
     "_fontSize": 20,
@@ -2438,7 +2434,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": true,
     "_string": " 请输入账号",
     "_N$string": " 请输入账号",
     "_fontSize": 20,
@@ -2492,7 +2487,6 @@
       "__id__": 44
     },
     "_enabled": true,
-    "_useOriginalSize": false,
     "_string": "",
     "returnType": 0,
     "maxLength": 8,
@@ -2606,7 +2600,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "账号不能为空",
     "_N$string": "账号不能为空",
     "_fontSize": 20,
@@ -2770,7 +2763,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "密码：",
     "_N$string": "密码：",
     "_fontSize": 30,
@@ -3065,7 +3057,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": true,
     "_string": "",
     "_N$string": "",
     "_fontSize": 20,
@@ -3191,7 +3182,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": true,
     "_string": " 请输入密码",
     "_N$string": " 请输入密码",
     "_fontSize": 20,
@@ -3245,7 +3235,6 @@
       "__id__": 61
     },
     "_enabled": true,
-    "_useOriginalSize": false,
     "_string": "",
     "returnType": 0,
     "maxLength": 8,
@@ -3359,7 +3348,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "密码不能为空",
     "_N$string": "密码不能为空",
     "_fontSize": 20,
@@ -3431,7 +3419,7 @@
         1,
         1,
         1,
-        1
+        0
       ]
     },
     "_eulerAngles": {
@@ -3524,7 +3512,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "登  录",
     "_N$string": "登  录",
     "_fontSize": 30,
@@ -3738,7 +3725,7 @@
         1,
         1,
         1,
-        1
+        0
       ]
     },
     "_eulerAngles": {
@@ -4291,7 +4278,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "正在连接",
     "_N$string": "正在连接",
     "_fontSize": 13,
@@ -4766,7 +4752,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "注  册",
     "_N$string": "注  册",
     "_fontSize": 30,
@@ -4930,7 +4915,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "账号：",
     "_N$string": "账号：",
     "_fontSize": 30,
@@ -5225,7 +5209,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": true,
     "_string": "",
     "_N$string": "",
     "_fontSize": 20,
@@ -5351,7 +5334,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": true,
     "_string": " 请输入账号",
     "_N$string": " 请输入账号",
     "_fontSize": 20,
@@ -5405,7 +5387,6 @@
       "__id__": 111
     },
     "_enabled": true,
-    "_useOriginalSize": false,
     "_string": "",
     "returnType": 0,
     "maxLength": 8,
@@ -5519,7 +5500,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "账号不能为空",
     "_N$string": "账号不能为空",
     "_fontSize": 20,
@@ -5683,7 +5663,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "密码：",
     "_N$string": "密码：",
     "_fontSize": 30,
@@ -5978,7 +5957,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": true,
     "_string": "",
     "_N$string": "",
     "_fontSize": 20,
@@ -6104,7 +6082,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": true,
     "_string": " 请输入密码",
     "_N$string": " 请输入密码",
     "_fontSize": 20,
@@ -6158,7 +6135,6 @@
       "__id__": 128
     },
     "_enabled": true,
-    "_useOriginalSize": false,
     "_string": "",
     "returnType": 0,
     "maxLength": 8,
@@ -6272,7 +6248,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "密码不能为空",
     "_N$string": "密码不能为空",
     "_fontSize": 20,
@@ -6344,7 +6319,7 @@
         1,
         1,
         1,
-        1
+        0
       ]
     },
     "_eulerAngles": {
@@ -6437,7 +6412,6 @@
     ],
     "_srcBlendFactor": 770,
     "_dstBlendFactor": 771,
-    "_useOriginalSize": false,
     "_string": "提  交",
     "_N$string": "提  交",
     "_fontSize": 30,
@@ -6651,7 +6625,7 @@
         1,
         1,
         1,
-        1
+        0
       ]
     },
     "_eulerAngles": {
@@ -6916,6 +6890,7 @@
     "_volume": 1,
     "_mute": false,
     "_loop": true,
+    "_firstlyEnabled": true,
     "playOnLoad": true,
     "preload": true,
     "_id": "36m00i4fZII6QrQjVSdhGj"

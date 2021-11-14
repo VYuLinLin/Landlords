@@ -10,6 +10,7 @@ const playerData = function () {
   const userData = JSON.parse(cc.sys.localStorage.getItem('userData'))
   const [rootId1, rootId2] = [getRandomStr(5), getRandomStr(5)]
   var that = userData || {
+    coin: 0, // 余额
     userId: '', // 用户id
     userName: '', // 用户名称，guest_ 开头
     roomId: '',// 游戏房间id

@@ -5,6 +5,8 @@
 // Learn life-cycle callbacks:
 //  - https://docs.cocos.com/creator/manual/en/scripting/life-cycle-callbacks.html
 
+const http = require("../util/http");
+
 cc.Class({
     extends: cc.Component,
 
@@ -16,8 +18,6 @@ cc.Class({
         tip: cc.Prefab,
         wait: cc.Node,
     },
-
-    // onLoad () {},
 
     start () {
 
@@ -40,21 +40,24 @@ cc.Class({
         }
         if (!this.verifyHandler()) return
         this.wait.active = true
-        myglobal.socket[`request_${val}`](data, function(status, res) {
+        const url = val === 'login' ? http.login : http.register
+        http.post(url, data, res => {
             this.wait.active = false
-            if (!status) {
-              this.tipNode && this.tipNode.destroy()
-              this.tipNode = cc.instantiate(this.tip)
-              this.tipNode.getComponent(cc.Label).string = res
-              this.tipNode.parent = this.node
-              return
+            console.log(res)
+            if (res.code) {
+                this.tipNode && this.tipNode.destroy()
+                this.tipNode = cc.instantiate(this.tip)
+                this.tipNode.getComponent(cc.Label).string = res.msg
+                this.tipNode.parent = this.node
+                return
             }
-            const {userId, userName} = res || {}
-            myglobal.playerData.userId = userId
-            myglobal.playerData.userName = userName
+            const {id, username, coin} = res.data || {}
+            myglobal.playerData.coin = coin
+            myglobal.playerData.userId = id
+            myglobal.playerData.userName = username
             cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
             cc.director.loadScene("hallScene")
-          }.bind(this))
+        })
     },
     closeHandler() {
         this.node.active = false
