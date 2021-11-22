@@ -8,21 +8,37 @@ const httpUrl = 'http://172.21.165.80:80'
     logout: '/logout',
     /**
      * get请求
-     * @param {string} url 
+     * @param {string} route 
+     * @param {object} param 
      * @param {function} callback 
      */
-    get(url, callback) {
-        let xhr = cc.loader.getXMLHttpRequest();
+    get(route, param, callback) {
+        if (param instanceof Function) {
+            callback = param
+        }
+        let xhr = new XMLHttpRequest();
+        // let xhr = cc.loader.getXMLHttpRequest();
         xhr.onreadystatechange = function () {
-            // cc.log('url', httpUrl, 'Get: readyState=' + xhr.readyState + '  xhr.status=' + xhr.status);
+            // cc.log('route', httpUrl, 'Get: readyState=' + xhr.readyState + '  xhr.status=' + xhr.status);
             if (xhr.readyState === 4 && xhr.status == 200) {
                 let respone = xhr.responseText;
                 let rsp = JSON.parse(respone);
                 callback(rsp);
             }
         };
-        xhr.withCredentials = true;
-        xhr.open('GET', httpUrl + url, true);
+        xhr.withCredentials = true; // 使用凭证，请求时允许携带cookie
+        let paramStr = '';
+        for(let key in param) {
+            if (paramStr === ''){
+                paramStr = '?';
+            }
+            if (paramStr !== '?') {
+                paramStr += '&';
+            }
+            paramStr += key + '=' + param[key];
+        }
+        const url = httpUrl + route + encodeURI(paramStr)
+        xhr.open('GET', url, true);
 
         // if (cc.sys.isNative) {
         // xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
@@ -42,14 +58,15 @@ const httpUrl = 'http://172.21.165.80:80'
 
     /**
      * post请求
-     * @param {string} url 
+     * @param {string} route 
      * @param {object} params 
      * @param {function} callback 
      */
-    post(url, params, callback) {
-        let xhr = cc.loader.getXMLHttpRequest();
+    post(route, params, callback) {
+        let xhr = new XMLHttpRequest();
+        // let xhr = cc.loader.getXMLHttpRequest();
         xhr.onreadystatechange = function () {
-            // cc.log('url', httpUrl, 'xhr.readyState=' + xhr.readyState + '  xhr.status=' + xhr.status);
+            // cc.log('route', httpUrl, 'xhr.readyState=' + xhr.readyState + '  xhr.status=' + xhr.status);
             if (xhr.readyState === 4 && xhr.status == 200) {
                 let respone = xhr.responseText;
                 let rsp = JSON.parse(respone);
@@ -57,7 +74,8 @@ const httpUrl = 'http://172.21.165.80:80'
             }
         };
         xhr.withCredentials = true;
-        xhr.open('POST', httpUrl + url, true);
+        const url = httpUrl + route
+        xhr.open('POST', url, true);
         // if (cc.sys.isNative) {
         // xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
         // xhr.setRequestHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');

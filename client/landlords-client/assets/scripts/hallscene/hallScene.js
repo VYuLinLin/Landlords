@@ -1,6 +1,7 @@
 import myglobal from "../mygolbal.js";
 import http from "../util/http.js";
-
+import { WS } from '../util/websocket.js'
+import wsAPI from '../util/wsAPI.js'
 cc.Class({
     extends: cc.Component,
 
@@ -15,14 +16,26 @@ cc.Class({
     },
 
     // LIFE-CYCLE CALLBACKS:
-
+    start() {
+        console.log('start', cc.ws._isConnected)
+    },
     onLoad() {
         this.nickname_label.string = myglobal.playerData.userName;
         cc.director.preloadScene("gameScene");
+        console.log('onLoad')
+        if (!cc.ws) {
+            cc.wsApi = wsAPI
+            cc.ws = new WS().connect()
+            // cc.ws.on(cc.ws.MESSAGE, this.onMessage.bind(this))
+        }
     },
-
-    start() { },
-
+    onDestroy() {
+        console.log('onDestroy', cc.ws._isConnected)
+    },
+    
+    onMessage(e) {
+        console.log('onMessage', e, this)
+    },
     // update (dt) {},
 
     onButtonClick(event, customData) {
