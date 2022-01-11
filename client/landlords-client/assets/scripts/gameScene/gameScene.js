@@ -1,7 +1,7 @@
+import playerData from "../data/player.js";
 import myglobal from "../mygolbal.js"
-const ddzConstants = require('ddzConstants')
+const ddzConsts= require('ddzConstants')
 const ddzData = require('ddzData')
-
 cc.Class({
   extends: cc.Component,
   properties: {
@@ -16,48 +16,63 @@ cc.Class({
     btn_ready: cc.Node, // 准备按钮
     //绑定玩家座位,下面有3个子节点
     players_seat_pos: cc.Node,
-    gameUiNode: cc.Node
+    gameUiNode: cc.Node,
+    tip: cc.Prefab,
   },
   onLoad() {
-    ddzData.gameState = ddzConstants.gameState.WAITREADY
-    if (!CC_EDITOR) {
-      ddzData.gameStateNotify.addListener(this.gameStateHandler, this)
-    }
-    this.playerNodeList = []
-    const { roomId, roomName, rate, bottom, roots } = myglobal.playerData
+    console.log("game load")
+    // ws.initWS()
+    console.log("game load end")
 
-    this.roomid_label.string = roomName
-    this.beishu_label.string = "倍数：" + rate
-    this.di_label.string = "底：" + bottom
-    console.log('重新开始', ddzData.gameState)
-    this.btn_ready.active = ddzData.gameState < ddzConstants.gameState.GAMESTART // 准备按钮
-    if (isopen_sound) {
-      cc.audioEngine.stopAll()
-      cc.audioEngine.play(this.bjMusic, true)
-    }
-    // 玩家
-    this.addPlayerNode(myglobal.playerData)
-    // 机器人1
-    this.addPlayerNode({
-      ...roots[0],
-      seatindex: 1
-    })
-    // 机器人2
-    this.addPlayerNode({
-      ...roots[1],
-      seatindex: 2
-    })
-    //监听，给其他玩家发牌(内部事件)
-    this.node.on("pushcard_other_event", function () {
-      console.log('其他玩家发牌')
-      for (let i = 0; i < this.playerNodeList.length; i++) {
-        const node = this.playerNodeList[i]
-        if (node) {
-          //给playernode节点发送事件
-          node.emit("push_card_event")
-        }
+    this.playerNodeList = []
+    this._event = cc.ws.on(cc.ws.MESSAGE, this.onMessage.bind(this))
+    const data = {
+      action: cc.wsApi.tableInfo,
+      data: {
+        room_id: myglobal.playerData.roomId,
+        table_id: myglobal.playerData.tableId,
       }
-    }.bind(this))
+    }
+    cc.ws.send(data)
+
+    cc.audioEngine.stopAll()
+    cc.audioEngine.play(this.bjMusic, true)
+
+    // ddzData.gameState = ddzConsts.gameStatus.WAITREADY
+    // if (!CC_EDITOR) {
+    //   ddzData.gameStateNotify.addListener(this.gameStateHandler, this)
+    // }
+    // this.playerNodeList = []
+    // const { roomId, roomName, rate, bottom, clients } = myglobal.playerData
+
+    // this.roomid_label.string = roomName
+    // this.beishu_label.string = "倍数：" + rate
+    // this.di_label.string = "底：" + bottom
+    // console.log('重新开始', ddzData.gameState)
+    // this.btn_ready.active = ddzData.gameState < ddzConsts.gameStatus.GAMESTART // 准备按钮
+    // // 玩家
+    // this.addPlayerNode(myglobal.playerData)
+    // // 机器人1
+    // this.addPlayerNode({
+    //   ...clients[0],
+    //   seatindex: 1
+    // })
+    // // 机器人2
+    // this.addPlayerNode({
+    //   ...clients[1],
+    //   seatindex: 2
+    // })
+    // //监听，给其他玩家发牌(内部事件)
+    // this.node.on("pushcard_other_event", function () {
+    //   console.log('其他玩家发牌')
+    //   for (let i = 0; i < this.playerNodeList.length; i++) {
+    //     const node = this.playerNodeList[i]
+    //     if (node) {
+    //       //给playernode节点发送事件
+    //       node.emit("push_card_event")
+    //     }
+    //   }
+    // }.bind(this))
 
     //监听房间状态改变事件
     // myglobal.socket.onRoomChangeState(function (data) {
@@ -105,7 +120,7 @@ cc.Class({
       } else {
 
         //enter_room成功
-        //notify ={"seatid":1,"playerdata":[{"accountid":"2117836","userName":"tiny543","avatarUrl":"http://xxx","goldcount":1000}]}
+        //notify ={"seatid":1,"playerdata":[{"accountid":"2117836","userName":"tiny543","avatarUrl":"http://xxx","coin":1000}]}
         var seatid = result.seatindex //自己在房间里的seatid
         this.playerdata_list_pos = []  //3个用户创建一个空用户列表
         this.setPlayerSeatPos(seatid)
@@ -193,14 +208,67 @@ cc.Class({
     // }.bind(this))
   },
   start() {
-    $socket.on('change_master_notify', this.masterNotify, this)
+    // $socket.on('change_master_notify', this.masterNotify, this)
   },
   onDestroy() {
+    cc.ws.off(this._event)
     if (!CC_EDITOR) {
       ddzData.gameStateNotify.removeListener(this.gameStateHandler, this)
       cc.audioEngine.stopAll()
     }
-    $socket.remove('change_master_notify', this)
+    // $socket.remove('change_master_notify', this)
+  },
+  onMessage(e) {
+    if (!e) return
+    if (e.code === 500) {
+      this.tipNode && this.tipNode.destroy()
+      this.tipNode = cc.instantiate(this.tip)
+      this.tipNode.getComponent(cc.Label).string = e.data
+      this.tipNode.parent = this.node
+      return
+    }
+    switch (e.action) {
+      case cc.wsApi.tableInfo:
+        const {state, room_id, table_id, creator, clients} = e.data
+
+        myglobal.playerData.creator = creator
+        ddzData.gameState = state
+        this.roomid_label.string = ddzConsts.roomNames[room_id-1] + '：' + table_id
+        this.btn_ready.active = state < ddzConsts.gameStatus.GAMESTART // 准备按钮
+        for (var i = 0; i < this.playerNodeList.length; i++) {
+          var node = this.playerNodeList[i]
+          node.destroy()
+        }
+        clients.map(c => {
+          this.addPlayerNode(c)
+        })
+        break
+      case cc.wsApi.tableUpdate:
+        const {state, creator} = e.data
+        myglobal.playerData.creator = creator
+        ddzData.gameState = state
+        break
+      case cc.wsApi.roomJoinOther:
+        this.addPlayerNode(e.data)
+        break
+      case cc.wsApi.roomLeave:
+        if (myglobal.playerData.userId === e.data) {
+          ddzData.gameState = ddzConsts.gameStatus.INVALID
+          myglobal.playerData.roomId = ''
+          cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
+          cc.director.loadScene("hallScene")
+        } else {
+          const [player] = this.playerNodeList.filter(a => a.getComponent("player_node").userId === e.data)
+          if (!player) return
+          player.destroy()
+          this.playerNodeList = this.playerNodeList.filter(a => a.getComponent("player_node").userId !== e.data)
+        }
+        break
+      case cc.wsApi.playerReady:
+        this.btn_ready.active = false
+        // ddzData.gameState = ddzConsts.gameStatus.GAMESTART
+        break
+    }
   },
   // 通知谁是地主, 并显示底牌
   masterNotify({ masterId, cards }) {
@@ -217,25 +285,18 @@ cc.Class({
     }
   },
   gameStateHandler(state) {
-    this.btn_ready.active = ddzData.gameState < ddzConstants.gameState.GAMESTART
-    if (state === ddzConstants.gameState.WAITREADY) {
+    this.btn_ready.active = ddzData.gameState < ddzConsts.gameStatus.GAMESTART
+    if (state === ddzConsts.gameStatus.WAITREADY) {
       this.btn_ready.active = true
     }
   },
   // 返回大厅
   onGoback() {
-    ddzData.gameState = ddzConstants.gameState.INVALID
-    myglobal.playerData.roomId = ''
-    cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
-    cc.director.loadScene("hallScene")
+    cc.ws.send({ action: cc.wsApi.roomLeave })
   },
   // 准备
   onBtnReadey(event) {
-    this.btn_ready.active = false
-    this.playerNodeList.forEach(node => {
-      node.emit("gamestart_event")
-    });
-    ddzData.gameState = ddzConstants.gameState.GAMESTART
+    cc.ws.send({ action: cc.wsApi.playerReady })
   },
   //seat_index自己在房间的位置id
   // setPlayerSeatPos(seat_index) {
@@ -271,16 +332,14 @@ cc.Class({
   // },
   // 添加玩家节点
   addPlayerNode(player_data) {
-    var index = player_data.seatindex
+    var index = player_data.user_id === myglobal.playerData.userId ? 0 : player_data.next_id === myglobal.playerData.userId ? 2 : 1
+    player_data.seat_index = index
     var playernode_inst = cc.instantiate(this.player_node_prefabs)
     playernode_inst.parent = this.players_seat_pos.children[index]
-    // playernode_inst.parent = this.node
     //创建的节点存储在gamescene的列表中
     this.playerNodeList.push(playernode_inst)
 
-    //玩家在room里的位置索引(逻辑位置)
-    // playernode_inst.position = this.players_seat_pos.children[index].position
-    playernode_inst.getComponent("player_node").init_data(player_data, index)
+    playernode_inst.getComponent("player_node").init_data(player_data)
 
     // myglobal.playerData.playerList[index] = player_data
   },

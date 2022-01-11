@@ -1,7 +1,6 @@
 import myglobal from "../mygolbal.js";
 import http from "../util/http.js";
-import { WS } from '../util/websocket.js'
-import wsAPI from '../util/wsAPI.js'
+import ws from '../util/websocket.js'
 cc.Class({
     extends: cc.Component,
 
@@ -20,17 +19,13 @@ cc.Class({
         console.log('start', cc.ws._isConnected)
     },
     onLoad() {
+        ws.initWS()
+
         this.nickname_label.string = myglobal.playerData.userName;
         cc.director.preloadScene("gameScene");
-        console.log('onLoad')
-        if (!cc.ws) {
-            cc.wsApi = wsAPI
-            cc.ws = new WS().connect()
-            // cc.ws.on(cc.ws.MESSAGE, this.onMessage.bind(this))
-        }
     },
     onDestroy() {
-        console.log('onDestroy', cc.ws._isConnected)
+        console.log('onDestroy')
     },
     
     onMessage(e) {
@@ -51,7 +46,11 @@ cc.Class({
                 join_Room.zIndex = 100;
                 break;
             case "logout":
-                http.get(http.logout, (res) => {
+                const data = {
+                    id: myglobal.playerData.userId,
+                    name: myglobal.playerData.userName,
+                }
+                http.get(http.logout, data, (res) => {
                     console.log(res);
                     if (res.code) {
                         this.tipNode && this.tipNode.destroy();
@@ -60,8 +59,11 @@ cc.Class({
                         this.tipNode.parent = this.node;
                         return;
                     }
+                    myglobal.playerData = {}
                     cc.sys.localStorage.clear()
                     cc.director.loadScene('loginScene')
+                    cc.ws.close()
+                    cc.ws = null
                 });
                 break;
             default:

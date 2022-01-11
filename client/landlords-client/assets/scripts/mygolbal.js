@@ -3,6 +3,6 @@ import eventlister from "./util/event_lister.js"
 
 const myglobal = myglobal || {}
 myglobal.playerData = playerdata()
-myglobal.eventlister = eventlister({})
+window.$socket = eventlister({})
 
 export default myglobal

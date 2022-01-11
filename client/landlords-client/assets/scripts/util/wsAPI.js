@@ -43,5 +43,15 @@ export default {
     RSP_CHAT: 44,
 
     REQ_RESTART: 45,
-    RSP_RESTART: 46
-}
+    RSP_RESTART: 46,
+
+    roomList: 'room/list',
+    roomJoinSelf: 'room/join/self',    // 玩家进入房间
+    roomJoinOther: 'room/join/other',    // 其他玩家进入房间
+    roomLeave: 'room/leave',    // 玩家离开
+    tableInfo: 'table/info', // 当前桌子和玩家信息
+    tableUpdate: 'table/update', // 桌子状态更新
+    userUpdate: 'user/update',
+    playerReady: 'player/ready',
+    
+}	

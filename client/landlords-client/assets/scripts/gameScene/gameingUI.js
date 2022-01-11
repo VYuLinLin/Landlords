@@ -1,5 +1,5 @@
 import myglobal from "../mygolbal.js"
-const ddzConstants = require('ddzConstants')
+const ddzConsts= require('ddzConstants')
 const ddzData = require('ddzData')
 
 cc.Class({
@@ -183,7 +183,7 @@ cc.Class({
   },
   gameStateHandler(state) {
     // 开始游戏 - 已准备
-    if (state === ddzConstants.gameState.GAMESTART) {
+    if (state === ddzConsts.gameStatus.GAMESTART) {
       // 关闭胜利或失败效果
       this.winNode.active = false
       this.loseNode.active = false
@@ -317,7 +317,7 @@ cc.Class({
     } else {
       this.loseNode.active = true
     }
-    ddzData.gameState = ddzConstants.gameState.WAITREADY
+    ddzData.gameState = ddzConsts.gameStatus.WAITREADY
   },
   //对牌排序
   sortCard() {

@@ -43,7 +43,6 @@ cc.Class({
         const url = val === 'login' ? http.login : http.register
         http.post(url, data, res => {
             this.wait.active = false
-            console.log(res)
             if (res.code) {
                 this.tipNode && this.tipNode.destroy()
                 this.tipNode = cc.instantiate(this.tip)

@@ -1,24 +1,32 @@
 import myglobal from "../../mygolbal.js"
-import http from "../../util/http.js";
 cc.Class({
   extends: cc.Component,
   properties: {
     roomList: [cc.Node],
+    tip: cc.Prefab,
   },
   onLoad() {
     this._event = cc.ws.on(cc.ws.MESSAGE, this.onMessage.bind(this))
-    cc.ws.send([cc.wsApi.REQ_ROOM_LIST])
+    cc.ws.send({ action: cc.wsApi.roomList })
   },
   onDestroy() {
     cc.ws.off(this._event)
   },
   onMessage(e) {
-    if (e[0] === cc.wsApi.RSP_ROOM_LIST) {
+    if (!e) return
+    if (e.code === 500) {
+      this.tipNode && this.tipNode.destroy()
+      this.tipNode = cc.instantiate(this.tip)
+      this.tipNode.getComponent(cc.Label).string = e.data
+      this.tipNode.parent = this.node
+      return
+    }
+    if (e.action === cc.wsApi.roomList) {
       const roomList = this.roomList
       roomList.forEach(a => {
         a.active = false
       });
-      const list = e[1]
+      const list = e.data
       for (let i = 0; i < list.length; i++) {
         const {room_id, entrance_fee} = list[i];
         roomList[room_id-1].active = true
@@ -26,25 +34,15 @@ cc.Class({
         label.string = entrance_fee
       }
     }
-    if (e[0] === cc.wsApi.RSP_JOIN_TABLE) {
-      const tableId = e[1]
-      const tableUserList = e[2]
-      console.log(this._event, tableId, tableUserList)
-      if (tableId) {
-        myglobal.playerData.roomId = tableId
-        myglobal.playerData.roots = e[2]
+    if (e.action === cc.wsApi.roomJoinSelf) {
+      if (e.code === 200) {
+        const {room_id, table_id} = e.data
+        myglobal.playerData.roomId = room_id
+        myglobal.playerData.tableId = table_id
+        cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
         cc.director.loadScene("gameScene")
         this.node.destroy()
       }
-      // const {rate, bottom, id, name, roots} = res
-    //   myglobal.playerData.bottom = bottom
-    //   myglobal.playerData.rate = rate
-    //   myglobal.playerData.roomId = id
-    //   myglobal.playerData.roomName = name
-    //   myglobal.playerData.roots = roots
-    //   cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
-    //   cc.director.loadScene("gameScene")
-    //   this.node.destroy()
     }
   },
   onBtnClose() {
@@ -52,25 +50,11 @@ cc.Class({
   },
   // 进入游戏房间
   onButtonClick(event, room_id) {
-    cc.ws.send([cc.wsApi.REQ_JOIN_ROOM, room_id])
-
-
-    // const data = {
-    //   roomLevel: room_id,
-    //   userId: myglobal.playerData.userId
-    // }
-    // myglobal.socket.request_creatroom(data, function (err, res) {
-    //   console.log("创建房间", res)
-    //   const {rate, bottom, id, name, roots} = res
-    //   myglobal.playerData.bottom = bottom
-    //   myglobal.playerData.rate = rate
-    //   myglobal.playerData.roomId = id
-    //   myglobal.playerData.roomName = name
-    //   myglobal.playerData.roots = roots
-    //   cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
-    //   cc.director.loadScene("gameScene")
-    //   this.node.destroy()
-    // }.bind(this))
-  }
+    const data = {
+      action: cc.wsApi.roomJoinSelf,
+      data: room_id
+    }
+    cc.ws.send(data)
+  },
 
 });

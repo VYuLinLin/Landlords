@@ -1,4 +1,5 @@
 import myglobal from "../mygolbal.js"
+import ws from "../util/websocket"
 
 var LoadingLayer = cc.Class({
   extends: cc.Component,
@@ -23,6 +24,7 @@ var LoadingLayer = cc.Class({
     } else if (!roomId) {
       cc.director.loadScene('hallScene')
     } else {
+      ws.initWS()
       cc.director.loadScene('gameScene')
     }
   },

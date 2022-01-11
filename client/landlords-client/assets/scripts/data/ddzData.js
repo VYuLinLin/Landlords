@@ -3,7 +3,7 @@
  * Author: 
  * Desc:斗地主 数据层
  */
-const ddzConstants = require('ddzConstants')
+const ddzConsts = require('ddzConstants')
 const DataNotify = require('DataNotify')
 
 module.exports = {

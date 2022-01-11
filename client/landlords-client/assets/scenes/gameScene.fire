@@ -799,7 +799,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        83.33333333333334,
+        0,
         25,
         0,
         0,
@@ -894,7 +894,7 @@
       "__type__": "TypedArray",
       "ctor": "Float64Array",
       "array": [
-        -83.33333333333331,
+        0,
         25,
         0,
         0,
@@ -978,7 +978,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 60,
-      "height": 31.5
+      "height": 30.24
     },
     "_anchorPoint": {
       "__type__": "cc.Vec2",
@@ -1032,7 +1032,7 @@
     "_string": "初级房",
     "_N$string": "初级房",
     "_fontSize": 20,
-    "_lineHeight": 25,
+    "_lineHeight": 24,
     "_enableWrapText": true,
     "_N$file": null,
     "_isSystemFontUsed": true,
@@ -5386,6 +5386,9 @@
     },
     "gameUiNode": {
       "__id__": 35
+    },
+    "tip": {
+      "__uuid__": "055c5553-7099-4b12-a795-90e9f79ab5d4"
     },
     "_id": "92ngaPIhdKnLueFvZ/XFk3"
   },

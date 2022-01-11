@@ -13,15 +13,18 @@ const playerData = function () {
     coin: 0, // 余额
     userId: '', // 用户id
     userName: '', // 用户名称，guest_ 开头
+
     roomId: '',// 游戏房间id
-    roomName: '',
-    seatindex: 0, // 作为id
+    // roomName: '',
+    creator: '', // 房主
+    tableId: '', // 游戏桌子id
+    tableStatus: 0, // 桌子状态
+    // seatindex: 0, // 作为id
     avatarUrl: 'avatar_1', // 头像
-    goldcount: 10000, // 金额
-    roots: [],
+    clients: [],
     // rootList: [
-    //   { seatindex: 1, userId: rootId1, userName: `guest_${rootId1}`, "avatarUrl": "avatar_2", "goldcount": getRandomStr(4) },
-    //   { seatindex: 2, userId: rootId2, userName: `guest_${rootId2}`, "avatarUrl": "avatar_3", "goldcount": getRandomStr(4) }
+    //   { seatindex: 1, userId: rootId1, userName: `guest_${rootId1}`, "avatarUrl": "avatar_2", "coin": getRandomStr(4) },
+    //   { seatindex: 2, userId: rootId2, userName: `guest_${rootId2}`, "avatarUrl": "avatar_3", "coin": getRandomStr(4) }
     // ],
     masterUserId: '', // 地主id
   }

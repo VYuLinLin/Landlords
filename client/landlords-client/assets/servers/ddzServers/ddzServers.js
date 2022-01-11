@@ -1,5 +1,5 @@
 const mygolbal = require('mygolbal')
-const ddzConstants = require('ddzConstants')
+const ddzConsts= require('ddzConstants')
 const ddzData = require('ddzData')
 const carder = require("carder")
 const AILogic = require("AILogic")
@@ -26,7 +26,7 @@ const ddzServers = {
     }
   },
   gameStateHandler(value) {
-    const states = ddzConstants.gameState
+    const states = ddzConsts.gameStatus
     switch (value) {
       case states.INVALID: // 无效
         break
@@ -160,10 +160,10 @@ const ddzServers = {
       }
     } else {
       // 无人抢地主,重新开始
-      this.setGameState(ddzConstants.gameState.GAMESTART)
+      this.setGameState(ddzConsts.gameStatus.GAMESTART)
     }
     // 确定地主后切换游戏状态
-    this.landlordId && this.setGameState(ddzConstants.gameState.SHOWBOTTOMCARD)
+    this.landlordId && this.setGameState(ddzConsts.gameStatus.SHOWBOTTOMCARD)
   },
   // 下一位玩家出牌
   nextPlayerNotify(userId) {
@@ -175,7 +175,7 @@ const ddzServers = {
     const isOver = this.roundWinId && !this.playersData[this.roundWinId].cardList.length
     if (isOver) {
       // 游戏结束
-      this.setGameState(ddzConstants.gameState.GAMEEND)
+      this.setGameState(ddzConsts.gameStatus.GAMEEND)
       return
     }
     const ai = new AILogic(player)

@@ -1,17 +1,18 @@
 import myglobal from "../../mygolbal.js"
-const ddzConstants = require('ddzConstants')
+const ddzConsts= require('ddzConstants')
 const ddzData = require('ddzData')
 cc.Class({
   extends: cc.Component,
 
   properties: {
+    fangzhuNode: cc.Node,
     headImage: cc.Sprite,
     // account_label: cc.Label,
     nickname_label: cc.Label,
     // room_touxiang: cc.Sprite,
     globalcount_label: cc.Label,
-    // headimage: cc.Sprite,
     readyimage: cc.Node,
+    unreadyimage: cc.Node,
     card_node: cc.Node, // 扑克牌节点
     card_prefab: cc.Prefab,
     //tips_label:cc.Label,
@@ -115,16 +116,19 @@ cc.Class({
   //这里初始化房间内位置节点信息(自己和其他玩家)
   //data玩家节点数据
   //index玩家在房间的位置索引
-  init_data(data, index) {
-    //data:{"userId":"2117836","userName":"tiny543","avatarUrl":"http://xxx","goldcount":1000}
-    this.userId = data.userId
+  init_data(data) {
+    const index = data.seat_index
+    //data:{"userId":"2117836","userName":"tiny543","avatarUrl":"http://xxx","coin":1000}
+    this.userId = data.user_id
     // this.account_label.string = data.accountid
-    this.nickname_label.string = data.userName + '_' + data.userId
-    this.globalcount_label.string = data.goldcount
+    this.fangzhuNode.active = myglobal.playerData.creator === data.user_id
+    this.nickname_label.string = data.user_name + '_' + data.user_id
+    this.globalcount_label.string = data.coin
     this.cardlist_node = []
     this.seat_index = index
+    
     //这里根据传入的avarter来获取本地图像
-    var head_image_path = "UI/headimage/" + data.avatarUrl
+    var head_image_path = "UI/headimage/avatar_" + (index + 1)
     cc.loader.loadRes(head_image_path, cc.SpriteFrame, function (err, spriteFrame) {
       if (err) {
         console.log(err.message || err);
@@ -132,9 +136,10 @@ cc.Class({
       }
       this.headImage.spriteFrame = spriteFrame;
     }.bind(this));
-    if (!index) {
-      this.readyimage.active = false
-      return
+    console.log(index)
+    if (index !== 0) {
+      this.unreadyimage.active = data.status === ddzConsts.playerStatus.unready
+      this.readyimage.active = data.status === ddzConsts.playerStatus.ready
     }
     // 更改右边机器人的扑克牌位置
     if (index === 1) {
@@ -143,7 +148,7 @@ cc.Class({
   },
   gameStateHandler(state) {
     // 开始游戏 - 已准备
-    if (state === ddzConstants.gameState.GAMESTART) {
+    if (state === ddzConsts.gameStatus.GAMESTART) {
       // const cards = this.cardlist_node
       // for (let i = 0; i < cards.length; i++) {
       //   if (!cards[i]) break

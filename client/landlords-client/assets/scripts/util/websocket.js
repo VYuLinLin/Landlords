@@ -1,6 +1,13 @@
 import { EventEmitter } from "./eventEmitter";
 import wsAPI from "./wsAPI"
-// const wsAPI = require('wsAPI')
+cc.wsApi = wsAPI
+
+export default {
+    initWS() {
+        if (cc.ws) return
+        cc.ws = new WS().connect()
+    }
+}
 /**
  * WebSocket的工具类
  *
@@ -29,15 +36,18 @@ export class WS extends EventEmitter {
      * @param {string} url
      * @memberof WS
      */
-    connect(url) {
+    connect(url = 'ws://172.21.165.80/ws/') {
         if (!this._sock || this._sock.readyState !== WebSocket.OPEN) {
-            this._sock = new WebSocket(url || "ws://172.21.165.80/ws/");
+            
+            url += `?id=${myglobal.playerData.userId}&name=${myglobal.playerData.userName}`
+            this._sock = new WebSocket(url);
             // this._sock.binaryType = 'arraybuffer';
             this._sock.onopen = this._onOpen.bind(this);
             this._sock.onclose = this._onClose.bind(this);
             this._sock.onerror = this._onError.bind(this);
             this._sock.onmessage = this._onMessage.bind(this);
         }
+        console.log(this)
         return this;
     }
     /**
@@ -87,12 +97,24 @@ export class WS extends EventEmitter {
         this._reset()
         const _this = this;
         if (event.data instanceof Blob) {
-            event.data.text().then((res) => {
-                res = JSON.parse(res)
-                if (res === wsAPI.RES_HEART) return
-                console.log("message", res)
-                _this.emit(_this.MESSAGE, res)
-            });
+            if (event.data.text) {
+                event.data.text().then((res) => {
+                    res = JSON.parse(res)
+                    if (res === wsAPI.RES_HEART) return
+                    console.log("message", res)
+                    _this.emit(_this.MESSAGE, res)
+                });
+            } else {
+                // 兼容QQ浏览器等无Blob实例方法的浏览器
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    res = JSON.parse(event.target.result)
+                    if (res === wsAPI.RES_HEART) return
+                    console.log("message", res)
+                    _this.emit(_this.MESSAGE, res)
+                };
+                reader.readAsText(event.data);
+            }
         } else {
             console.log("websocket", JSON.parse(event));
             this.emit(this.MESSAGE, event);
@@ -132,8 +154,12 @@ export class WS extends EventEmitter {
         this._sock.close();
         this._sock = null;
         this.allOff();
-
+        
         this._isConnected = false;
+        
+        clearTimeout(this._heartTimer);
+        clearTimeout(this._serverTimer);
+        clearInterval(this._sendFixHeartTimer)
     }
     // 开始心跳
     _start() {
@@ -153,13 +179,11 @@ export class WS extends EventEmitter {
         this._reconnectTimer && clearTimeout(this._reconnectTimer);
         const _this = this
         this._reconnectTimer = setTimeout(()=> {
-            _this.connect();
+            _this._sock && _this.connect();
         }, parseInt(Math.random()*2000 + 3000));
     }
     // 重置心跳
     _reset(){
-        // clearTimeout(this._heartTimer);
-        // clearTimeout(this._serverTimer);
         this._start();
     }
     // 20s固定发送心跳

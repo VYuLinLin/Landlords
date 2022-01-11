@@ -1,4 +1,4 @@
-const httpUrl = 'http://172.21.165.80:80'
+const httpUrl = 'http://localhost'
 /**
  * Http 请求封装
  */
@@ -26,7 +26,7 @@ const httpUrl = 'http://172.21.165.80:80'
                 callback(rsp);
             }
         };
-        xhr.withCredentials = true; // 使用凭证，请求时允许携带cookie
+        // xhr.withCredentials = true; // 使用凭证，请求时允许携带cookie
         let paramStr = '';
         for(let key in param) {
             if (paramStr === ''){
@@ -73,7 +73,7 @@ const httpUrl = 'http://172.21.165.80:80'
                 callback(rsp);
             }
         };
-        xhr.withCredentials = true;
+        // xhr.withCredentials = true;
         const url = httpUrl + route
         xhr.open('POST', url, true);
         // if (cc.sys.isNative) {

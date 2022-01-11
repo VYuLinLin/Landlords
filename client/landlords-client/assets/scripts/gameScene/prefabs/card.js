@@ -1,6 +1,6 @@
 import myglobal from "../../mygolbal.js"
 const ddzData = require('ddzData')
-const ddzConstants = require('ddzConstants')
+const ddzConsts= require('ddzConstants')
 
 cc.Class({
   extends: cc.Component,
@@ -47,7 +47,7 @@ cc.Class({
       this.node.on(cc.Node.EventType.TOUCH_START, function (event) {
         // var gameScene_node = this.node.parent
         // var room_state = gameScene_node.getComponent("gameScene").roomstate
-        if (ddzData.gameState === ddzConstants.gameState.PLAYING) {
+        if (ddzData.gameState === ddzConsts.gameStatus.PLAYING) {
           console.log("TOUCH_START id:" + this.caardIndex)
           if (!this.flag) {
             this.flag = true

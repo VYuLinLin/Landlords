@@ -47,7 +47,7 @@ cc.Class({
           }
 
           console.log("login sucess" + JSON.stringify(result))
-          myglobal.playerData.gobal_count = result.goldcount
+          myglobal.playerData.coin = result.coin
           cc.director.loadScene("hallScene")
         }.bind(this))
         break
