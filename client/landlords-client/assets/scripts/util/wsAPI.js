@@ -53,5 +53,8 @@ export default {
     tableUpdate: 'table/update', // 桌子状态更新
     userUpdate: 'user/update',
     playerReady: 'player/ready',
-    
+    playerDeal: 'player/deal', // 玩家发牌
+    tableCallPoints: 'table/callPoints', // 抢地主
+    PlayerCallPoints: 'player/callPoints', // 玩家叫分
+
 }	

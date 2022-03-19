@@ -47,8 +47,8 @@ cc.Class({
       this.node.on(cc.Node.EventType.TOUCH_START, function (event) {
         // var gameScene_node = this.node.parent
         // var room_state = gameScene_node.getComponent("gameScene").roomstate
-        if (ddzData.gameState === ddzConsts.gameStatus.PLAYING) {
-          console.log("TOUCH_START id:" + this.caardIndex)
+        // if (ddzData.gameState === ddzConsts.gameStatus.PLAYING) {
+          console.log("TOUCH_START id:" + this.card_data)
           if (!this.flag) {
             this.flag = true
             this.node.y += this.offset_y
@@ -66,13 +66,13 @@ cc.Class({
             $socket.emit('_unchooseCard', this.caardIndex)
             // gameScene_node.emit("unchoose_card_event", this.caardIndex)
           }
-        }
+        // }
       }.bind(this))
     }
   },
   showCards(card, userId) {
     //card.index是服务器生成card给对象设置的一副牌里唯一id
-    this.caardIndex = card.index
+    // this.caardIndex = card.index
     //传入参数 card={"value":5,"shape":1,"index":20}
     this.card_data = card
     if (userId) {
@@ -116,12 +116,12 @@ cc.Class({
       "15": 53
     };
 
-    var spriteKey = '';
-    if (card.shape) {
-      spriteKey = 'card_' + (cardShape[card.shape] * 13 + cardValue[card.value]);
-    } else {
-      spriteKey = 'card_' + kings[card.king];
-    }
+    var spriteKey = 'card_' + (card + 1);
+    // if (card.shape) {
+    //   spriteKey = 'card_' + (cardShape[card.shape] * 13 + cardValue[card.value]);
+    // } else {
+    //   spriteKey = 'card_' + kings[card.king];
+    // }
 
     this.node.getComponent(cc.Sprite).spriteFrame = this.cards_sprite_atlas.getSpriteFrame(spriteKey)
     this.setTouchEvent()

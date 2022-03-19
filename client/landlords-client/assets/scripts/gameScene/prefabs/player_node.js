@@ -45,13 +45,14 @@ cc.Class({
     //   this.readyimage.active = true
     // })
     // 开始游戏(客户端发给客户端)
-    this.node.on("gamestart_event", () => {
-      this.readyimage.active = false
-    })
+    // this.node.on("gamestart_event", () => {
+    //   this.readyimage.active = false
+    // })
 
-    //给其他玩家发牌事件
+    // 给其他玩家发牌事件
     this.node.on("push_card_event", function (event) {
       if (this.seat_index === 0) return // 自己不再发牌
+      this.readyimage.active = false
       this.pushCard()
     }.bind(this))
     // this.node.on("playernode_rob_state_event", function (event) {
@@ -121,7 +122,7 @@ cc.Class({
     //data:{"userId":"2117836","userName":"tiny543","avatarUrl":"http://xxx","coin":1000}
     this.userId = data.user_id
     // this.account_label.string = data.accountid
-    this.fangzhuNode.active = myglobal.playerData.creator === data.user_id
+    this.updateCreator()
     this.nickname_label.string = data.user_name + '_' + data.user_id
     this.globalcount_label.string = data.coin
     this.cardlist_node = []
@@ -137,13 +138,19 @@ cc.Class({
       this.headImage.spriteFrame = spriteFrame;
     }.bind(this));
     console.log(index)
-    if (index !== 0) {
-      this.unreadyimage.active = data.status === ddzConsts.playerStatus.unready
-      this.readyimage.active = data.status === ddzConsts.playerStatus.ready
-    }
+    this.updateReadyStatus(data.ready)
     // 更改右边机器人的扑克牌位置
     if (index === 1) {
       this.card_node.x = -this.card_node.x
+    }
+  },
+  updateCreator() {
+    this.fangzhuNode.active = myglobal.playerData.creator === this.userId
+  },
+  updateReadyStatus(status) {
+    if (this.seat_index !== 0) {
+      this.unreadyimage.active = !status
+      this.readyimage.active = status
     }
   },
   gameStateHandler(state) {
@@ -173,10 +180,10 @@ cc.Class({
       this.schedulerOnce(() => {
         isQdz && (this.robIcon_Sp.active = true) // 抢
         !isQdz && (this.robnoIcon_Sp.active = true) // 不抢
-        window.$socket.emit('canrob_state_notify', {
-          userId: this.userId,
-          state: isQdz ? qian_state.qiang : qian_state.buqiang
-        })
+        // window.$socket.emit('canrob_state_notify', {
+        //   userId: this.userId,
+        //   state: isQdz ? qian_state.qiang : qian_state.buqiang
+        // })
         common.audio.PlayEffect(isQdz ? this.jiaodizhu : this.buqiang)
       })
     }

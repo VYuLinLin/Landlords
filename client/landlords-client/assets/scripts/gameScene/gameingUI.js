@@ -196,12 +196,29 @@ cc.Class({
     }
   },
   pushCardNotify(data) {
+    let [W, w, two, one, other] = [[], [], [], [], []]
+    for (let i = 0; i < data.length; i++) {
+      const c = data[i]
+      if (c === 52) {
+        W.push(c)
+      } else if (c === 53) {
+        w.push(c)
+      } else if (c%13 === 1) {
+        two.push(c)
+      } else if (c%13 === 0) {
+        one.push(c)
+      } else {
+        other.push(c)
+      }
+    }
+    other.sort((a, b) => a%13 - b%13)
+    data = [...W, ...w, ...two, ...one, ...other]
     this.card_data = data
     this.cur_index_card = data.length - 1
     this.pushCard(data)
     //左边移动定时器
     this.scheduleOnce(this._runactive_pushcard.bind(this), 0.3)
-    this.node.parent.emit("pushcard_other_event")
+    // this.node.parent.emit("pushcard_other_event")
   },
   //处理发牌的效果
   _runactive_pushcard() {
@@ -237,7 +254,7 @@ cc.Class({
     for (var i = 0; i < this.push_card_tmp.length - 1; i++) {
       var move_node = this.push_card_tmp[i]
       var newx = move_node.x - (this.card_width * 0.4)
-      var action = cc.moveTo(0.1, cc.v2(newx, -250));
+      var action = cc.moveTo(0.1, cc.v2(newx, move_node.y));
       move_node.runAction(action)
     }
 
@@ -263,10 +280,10 @@ cc.Class({
         // 在第六次执行回调时取消这个计时器
         this.robUI.active = false
         this.unschedule(callback)
-        window.$socket.emit('canrob_state_notify', {
-          userId: myglobal.playerData.userId,
-          state: qian_state.buqiang,
-        })
+        // window.$socket.emit('canrob_state_notify', {
+        //   userId: myglobal.playerData.userId,
+        //   state: qian_state.buqiang,
+        // })
         common.audio.PlayEffect(this.buqiangAudio)
       }
       this.timeLabel.string = --this.count
@@ -354,24 +371,24 @@ cc.Class({
   },
   pushCard(data) {
     if (data) {
-      data.sort(function (a, b) {
-        if (a.hasOwnProperty('value') && b.hasOwnProperty('value')) {
-          return b.value - a.value;
-        }
-        if (a.hasOwnProperty('king') && !b.hasOwnProperty('king')) {
-          return -1;
-        }
-        if (!a.hasOwnProperty('king') && b.hasOwnProperty('king')) {
-          return 1;
-        }
-        if (a.hasOwnProperty('king') && b.hasOwnProperty('king')) {
-          return b.king - a.king;
-        }
-      });
+      // data.sort(function (a, b) {
+      //   if (a.hasOwnProperty('value') && b.hasOwnProperty('value')) {
+      //     return b.value - a.value;
+      //   }
+      //   if (a.hasOwnProperty('king') && !b.hasOwnProperty('king')) {
+      //     return -1;
+      //   }
+      //   if (!a.hasOwnProperty('king') && b.hasOwnProperty('king')) {
+      //     return 1;
+      //   }
+      //   if (a.hasOwnProperty('king') && b.hasOwnProperty('king')) {
+      //     return b.king - a.king;
+      //   }
+      // });
     }
     //创建card预制体
     this.cards_node = []
-    for (var i = 0; i < 17; i++) {
+    for (var i = 0; i < data.length; i++) {
 
       var card = cc.instantiate(this.card_prefab)
       card.scale = 0.8
@@ -570,24 +587,25 @@ cc.Class({
         break
     }
   },
-  // update (dt) {},
   onButtonClick(event, customData) {
     switch (customData) {
       case "btn_qiandz": // 不抢
         // myglobal.socket.requestRobState(qian_state.qiang)
-        window.$socket.emit('canrob_state_notify', {
-          userId: myglobal.playerData.userId,
-          state: qian_state.qiang,
-        })
+        // window.$socket.emit('canrob_state_notify', {
+        //   userId: myglobal.playerData.userId,
+        //   state: qian_state.qiang,
+        // })
+        cc.ws.send({ action: cc.wsApi.PlayerCallPoints, data: 0 })
         this.robUI.active = false
         common.audio.PlayEffect(this.jiaodizhuAudio)
         break
       case "btn_buqiandz": // 抢地主
         // myglobal.socket.requestRobState(qian_state.buqiang)
-        window.$socket.emit('canrob_state_notify', {
-          userId: myglobal.playerData.userId,
-          state: qian_state.buqiang,
-        })
+        // window.$socket.emit('canrob_state_notify', {
+        //   userId: myglobal.playerData.userId,
+        //   state: qian_state.buqiang,
+        // })
+        cc.ws.send({ action: cc.wsApi.PlayerCallPoints, data: 3 })
         this.robUI.active = false
         common.audio.PlayEffect(this.buqiangAudio)
         break

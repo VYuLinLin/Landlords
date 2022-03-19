@@ -1,4 +1,3 @@
-import playerData from "../data/player.js";
 import myglobal from "../mygolbal.js"
 const ddzConsts= require('ddzConstants')
 const ddzData = require('ddzData')
@@ -14,7 +13,7 @@ cc.Class({
     roomid_label: cc.Label,
     player_node_prefabs: cc.Prefab,
     btn_ready: cc.Node, // 准备按钮
-    //绑定玩家座位,下面有3个子节点
+    // 绑定玩家座位,下面有3个子节点
     players_seat_pos: cc.Node,
     gameUiNode: cc.Node,
     tip: cc.Prefab,
@@ -62,7 +61,7 @@ cc.Class({
     //   ...clients[1],
     //   seatindex: 2
     // })
-    // //监听，给其他玩家发牌(内部事件)
+    //监听，给其他玩家发牌(内部事件)
     // this.node.on("pushcard_other_event", function () {
     //   console.log('其他玩家发牌')
     //   for (let i = 0; i < this.playerNodeList.length; i++) {
@@ -244,29 +243,58 @@ cc.Class({
         })
         break
       case cc.wsApi.tableUpdate:
-        const {state, creator} = e.data
-        myglobal.playerData.creator = creator
-        ddzData.gameState = state
+        myglobal.playerData.creator = e.data.creator
+        ddzData.gameState = e.data.state
         break
       case cc.wsApi.roomJoinOther:
         this.addPlayerNode(e.data)
         break
       case cc.wsApi.roomLeave:
-        if (myglobal.playerData.userId === e.data) {
+        const {userId, creatorId} = e.data
+        myglobal.playerData.creator = creatorId
+        if (myglobal.playerData.userId === userId) {
           ddzData.gameState = ddzConsts.gameStatus.INVALID
           myglobal.playerData.roomId = ''
           cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
           cc.director.loadScene("hallScene")
         } else {
-          const [player] = this.playerNodeList.filter(a => a.getComponent("player_node").userId === e.data)
+          const [player] = this.playerNodeList.filter(a => a.getComponent("player_node").userId === userId)
           if (!player) return
           player.destroy()
-          this.playerNodeList = this.playerNodeList.filter(a => a.getComponent("player_node").userId !== e.data)
+          this.playerNodeList = this.playerNodeList.filter(a => {
+            const node = a.getComponent("player_node")
+            if (node.userId !== userId) {
+              node.updateCreator()
+              return true
+            }
+            return false
+          })
         }
         break
       case cc.wsApi.playerReady:
-        this.btn_ready.active = false
+        for (let i = 0; i < this.playerNodeList.length; i++) {
+          const playerNode = this.playerNodeList[i].getComponent("player_node")
+          const {seat_index, userId} = playerNode
+          if (seat_index === 0 && e.data[userId]) {
+            this.btn_ready.active = false
+          }
+          playerNode.updateReadyStatus(e.data[userId])
+        }
+        // this.btn_ready.active = false
         // ddzData.gameState = ddzConsts.gameStatus.GAMESTART
+        break
+      case cc.wsApi.playerDeal:
+        window.$socket.emit('pushcard_notify', e.data)
+        for (let i = 0; i < this.playerNodeList.length; i++) {
+          const node = this.playerNodeList[i]
+          if (node.seat_index !== 0) {
+            //给playernode节点发送事件
+            node.emit("push_card_event")
+          }
+        }
+        break
+      case cc.wsApi.tableCallPoints:
+        window.$socket.emit('canrob_notify', e.data)
         break
     }
   },
