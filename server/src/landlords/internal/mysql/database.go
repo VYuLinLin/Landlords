@@ -8,10 +8,10 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-//数据库配置
+// 数据库配置
 const (
 	userName = "root"
-	password = "121212"
+	password = "123456"
 	ip       = "127.0.0.1"
 	port     = "3306"
 	dbName   = "landlords"
@@ -43,4 +43,10 @@ func init() {
 
 	CreateTableUsers()
 	CreateTableRooms()
+}
+
+func errorHandler(err error) {
+	if err != nil {
+		panic(err.Error())
+	}
 }

@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	_ "landlords/internal/game/room"
 	_ "landlords/internal/mysql"
 	_ "landlords/internal/socketio"
 	"landlords/internal/version"

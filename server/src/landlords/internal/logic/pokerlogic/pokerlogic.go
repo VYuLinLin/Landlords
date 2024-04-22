@@ -5,16 +5,16 @@ import (
 	"reflect"
 	"time"
 
-	"landlords/internal/person"
+	"landlords/internal/player"
 	p "landlords/internal/poker"
 )
 
 // Card 一副新牌
 type Card struct {
 	Cards     p.Pokers
-	User1     person.Person
-	User2     person.Person
-	User3     person.Person
+	User1     player.Player
+	User2     player.Player
+	User3     player.Player
 	HoleCards p.Pokers
 }
 

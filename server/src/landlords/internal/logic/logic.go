@@ -3,7 +3,7 @@ package logic
 import (
 	"fmt"
 	"landlords/internal/logic/pokerlogic"
-	"landlords/internal/person"
+	"landlords/internal/player"
 )
 
 // InitRoom 初始化房间
@@ -13,5 +13,5 @@ func InitRoom() {
 	fmt.Println(card.Cards)
 	fmt.Println(len(card.Cards))
 
-	persons := &person.Persons{}
+	players := &player.Players{}
 }

@@ -1,43 +1,52 @@
 package api
 
 import (
+	"errors"
 	"fmt"
-	"landlords/internal/common"
+	"landlords/internal/game/room"
 	"landlords/internal/mysql"
-	"strconv"
 )
 
+type RoomApi struct{}
+
 type roomData struct {
-	level float64
-	name  string
+	RoomName  string `json:"room_name"`
+	RoomLevel int    `json:"room_level"`
+	TableID   int64  `json:"table_id"`
 }
 
-var rooms = map[string]string{
-	"1": "初级房",
-	"2": "中级房",
-	"3": "高级房",
-	"4": "大师房",
-}
-
-// CreateRoom 创建房间
-func CreateRoom(p interface{}) (d Msgs, err error) {
-	d = make(Msgs, 5)
+// JoinRoom 进入房间
+func (r *RoomApi) JoinRoom(p interface{}) (data *roomData, err error) {
 	m := p.(map[string]interface{})
-	roomLevel := m["roomLevel"].(string)
-	userID := m["userId"].(int)
-	level, _ := strconv.Atoi(roomLevel)
-	var roots = [2]common.User{
-		*NewUser("guest1"),
-		*NewUser("guest2"),
+	if m["roomLevel"] == nil || m["userId"] == nil {
+		return nil, errors.New("用户ID或房间等级不能为空")
 	}
+	level := m["roomLevel"].(string)
+	userID := m["userId"].(float64)
+	User := &mysql.User{
+		ID: int(userID),
+	}
+	user, err := mysql.QueryUserId(User)
+	fmt.Println("RoomApi JoinRoom:", *user, *User)
+	if err != nil {
+		return nil, err
+	}
+	roomInfo, err := room.JoinRoom(user, level)
+	data = &roomData{
+		RoomName:  roomInfo.RoomName,
+		RoomLevel: roomInfo.RoomLevel,
+		TableID:   roomInfo.Table.TableID,
+	}
+	return data, err
+}
 
-	d["id"] = userID
-	d["name"] = rooms[roomLevel]
-	d["rate"] = level
-	d["bottom"] = level * 10
-	d["roots"] = roots
-
-	err = mysql.InsertRoom(d)
-	fmt.Println(d)
+// GetTable 根据桌子id获取桌子信息
+func (r *RoomApi) GetTable(p interface{}) (d *room.Info, err error) {
+	m := p.(map[string]interface{})
+	if m["roomLevel"] == nil || m["tableId"] == nil || m["tableId"] == "" {
+		return nil, errors.New("tableId不能为空")
+	}
+	id := m["tableId"].(int64)
+	d, err = room.GetTableData(id)
 	return d, err
 }

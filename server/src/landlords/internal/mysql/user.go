@@ -1,25 +1,29 @@
 package mysql
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 )
 
 type User struct {
-	ID         int
-	NAME       string
-	PASSWORD   string
-	SCORE      int8
-	STATUS     int
-	CREATEDATE int64
+	ID         int    `json:"id"`
+	NAME       string `json:"name"`
+	PASSWORD   string `json:"-"`
+	COIN       int8   `json:"coin"`
+	SCORE      int8   `json:"score"`
+	STATUS     int    `json:"status"`
+	CREATETIME string `json:"create_time"`
+	ROOMID     int    `json:"room_id"`
+	TABLEID    int64  `json:"table_id"`
 }
 
-var INSERT_USER = `INSERT INTO users(id,name,password,createtime) VALUES(?,?,?,?);`
+var insertUserSql = `INSERT INTO users(coin,name,password,create_time) VALUES(?,?,?,?);`
 
 // InsertUser 新增用户
-func InsertUser(id int, name, password string) {
-	println(id)
-	result, err := db.Exec(INSERT_USER, id, name, password, int32(time.Now().Unix()))
+func InsertUser(name, password string) {
+	result, err := db.Exec(insertUserSql, 0, name, password, time.Now().Format("2006-01-02 15:04:05"))
 	if err != nil {
 		fmt.Printf("Insert data failed, err:%v \n", err)
 		return
@@ -40,22 +44,50 @@ func InsertUser(id int, name, password string) {
 	fmt.Println("Affected rows:", rowsaffected)
 }
 
-// QueryOneUser 查询用户
-func QueryOneUser(account string) (user *User, err error) {
+// QueryUser 查询用户
+func QueryUser(p *User) (user *User, err error) {
+	var row *sql.Row
+	if p.ID > 0 {
+		row = db.QueryRow("SELECT * FROM users WHERE name=? AND id=?", p.NAME, p.ID)
+	} else {
+		row = db.QueryRow("SELECT * FROM users WHERE name=?", p.NAME)
+	}
+	fmt.Println("QueryUser:", *p)
+	fmt.Println("QueryRow:", *row)
 	user = new(User) // 用new()函数初始化一个结构体对象
-	row := db.QueryRow("SELECT * FROM users WHERE name=?", account)
 	// row.scan中的字段必须是按照数据库存入字段的顺序，否则报错
-	if err := row.Scan(&user.ID, &user.NAME, &user.PASSWORD, &user.SCORE, &user.STATUS, &user.CREATEDATE); err != nil {
-		fmt.Printf("scan failed, err:%v\n", err)
-		return user, err
+	err = row.Scan(&user.ID, &user.NAME, &user.PASSWORD, &user.COIN, &user.SCORE, &user.STATUS, &user.CREATETIME, &user.ROOMID, &user.TABLEID)
+	if err == sql.ErrNoRows {
+		err = errors.New("未查询到此用户")
 	}
 	return user, err
 }
 
-var updateUserStatus = `UPDATE users SET score=28 WHERE name="唐僧";`
+// QueryUserId 根据ID查询用户
+func QueryUserId(p *User) (user *User, err error) {
+	var row *sql.Row
+	if p.ID > 0 {
+		row = db.QueryRow("SELECT * FROM users WHERE id=?", p.ID)
+	} else {
+		return user, errors.New("用户ID不能为空")
+	}
+	fmt.Println("QueryUser:", *p)
+	fmt.Println("QueryRow:", *row)
+	user = new(User) // 用new()函数初始化一个结构体对象
+	// row.scan中的字段必须是按照数据库存入字段的顺序，否则报错
+	err = row.Scan(&user.ID, &user.NAME, &user.PASSWORD, &user.COIN, &user.SCORE, &user.STATUS, &user.CREATETIME, &user.ROOMID, &user.TABLEID)
+	if err == sql.ErrNoRows {
+		err = errors.New("未查询到此用户")
+	}
+	return user, err
+}
 
-// UpdateUserStatus 修改用户的游戏状态
-func UpdateUserStatus(status int) {
-	db.Exec(updateUserStatus)
-
+// UpdateUserRoomIdAndTableId 更新用户房间和桌子id
+func UpdateUserRoomIdAndTableId(roomID int, tableId int64, p *User) (err error) {
+	if p.ID <= 0 {
+		return errors.New("用户ID不能为空")
+	}
+	result, err := db.Exec(`UPDATE users SET room_id=?, table_id=? WHERE id=?;`, roomID, tableId, p.ID)
+	fmt.Println(result)
+	return err
 }

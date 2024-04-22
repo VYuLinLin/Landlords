@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-var INSERT_ROOM = `INSERT INTO rooms(name,createtime) VALUES(?,?,?);`
+var INSERT_ROOM = `INSERT INTO rooms(name,create_time) VALUES(?,?,?);`
 
 // InsertRoom 新增游戏房间
 func InsertRoom(d map[string]interface{}) (err error) {
@@ -29,7 +29,7 @@ func InsertRoom(d map[string]interface{}) (err error) {
 		insertVals += "?,"
 	}
 	// INSERT_ROOM
-	var INSERT_ROOM = "INSERT INTO rooms(" + keys + "createtime) VALUES(" + insertVals + "?);"
+	var INSERT_ROOM = "INSERT INTO rooms(" + keys + "create_time) VALUES(" + insertVals + "?);"
 	result, err := db.Exec(INSERT_ROOM, vals...)
 	if err != nil {
 		fmt.Printf("Insert data failed, err:%v \n", err)
