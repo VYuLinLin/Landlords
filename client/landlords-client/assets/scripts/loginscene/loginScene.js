@@ -1,4 +1,11 @@
-import myglobal from "../mygolbal.js"
+/*
+ * @Author: X1-EXT\lylin lylin888@163.com
+ * @Date: 2022-05-09 13:33:49
+ * @LastEditors: X1-EXT\lylin lylin888@163.com
+ * @LastEditTime: 2024-04-18 15:05:52
+ * @FilePath: \landlords-client\assets\scripts\loginscene\loginScene.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 cc.Class({
   extends: cc.Component,
 
@@ -15,7 +22,7 @@ cc.Class({
     cc.director.preloadScene("hallScene")
   },
 
-  start() {},
+  start() { },
   // 确认协议
   confirmProtocol() {
     this.protocaolNode.children[0].active = !this.protocaolNode.children[0].active
@@ -27,30 +34,6 @@ cc.Class({
       return
     }
     switch (customData) {
-      case "wx_login":
-        console.log("wx_login request")
-
-        //this.wait_node.active = true
-
-        myglobal.socket.request_wxLogin({
-          uniqueID: myglobal.playerData.uniqueID,
-          // userId: myglobal.playerData.userId,
-          userName: myglobal.playerData.userName,
-          avatarUrl: myglobal.playerData.avatarUrl,
-        }, function (err, result) {
-          //请求返回
-          //先隐藏等待UI
-          //this.wait_node.active = false
-          if (err != 0) {
-            console.log("err:" + err)
-            return
-          }
-
-          console.log("login sucess" + JSON.stringify(result))
-          myglobal.playerData.coin = result.coin
-          cc.director.loadScene("hallScene")
-        }.bind(this))
-        break
       case 'user_login':
         this.loginPanel.active = true
         break

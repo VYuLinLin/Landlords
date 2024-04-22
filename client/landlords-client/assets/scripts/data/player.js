@@ -1,3 +1,11 @@
+/*
+ * @Author: X1-EXT\lylin lylin888@163.com
+ * @Date: 2022-05-09 13:33:49
+ * @LastEditors: X1-EXT\lylin lylin888@163.com
+ * @LastEditTime: 2024-04-18 14:57:22
+ * @FilePath: \landlords-client\assets\scripts\data\player.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 const getRandomStr = function (count) {
   var str = '';
   for (var i = 0; i < count; i++) {
@@ -13,7 +21,8 @@ const playerData = function () {
     coin: 0, // 余额
     userId: '', // 用户id
     userName: '', // 用户名称，guest_ 开头
-
+    userScore: 0, // 用户积分
+    userStatus: 0, // 用户状态
     roomId: '',// 游戏房间id
     // roomName: '',
     creator: '', // 房主
@@ -32,7 +41,6 @@ const playerData = function () {
   that.gobal_count = cc.sys.localStorage.getItem('user_count')
   // that.master_accountid = 0
   if (!userData) {
-    console.log(userData)
     cc.sys.localStorage.setItem('userData', JSON.stringify(that))
   }
   return that;

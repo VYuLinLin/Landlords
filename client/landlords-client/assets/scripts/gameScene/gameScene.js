@@ -19,6 +19,8 @@ cc.Class({
     tip: cc.Prefab,
   },
   onLoad() {
+    this.roomid_label.string = ddzConsts.roomNames[myglobal.playerData.roomId-1] + '：' + myglobal.playerData.tableId
+    
     console.log("game load")
     // ws.initWS()
     console.log("game load end")
@@ -211,6 +213,8 @@ cc.Class({
   },
   onDestroy() {
     cc.ws.off(this._event)
+    cc.ws.close()
+    cc.ws = null
     if (!CC_EDITOR) {
       ddzData.gameStateNotify.removeListener(this.gameStateHandler, this)
       cc.audioEngine.stopAll()

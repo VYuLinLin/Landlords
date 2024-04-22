@@ -1,4 +1,14 @@
-import myglobal from "../../mygolbal.js"
+/*
+ * @Author: X1-EXT\lylin lylin888@163.com
+ * @Date: 2022-05-09 13:33:49
+ * @LastEditors: X1-EXT\lylin lylin888@163.com
+ * @LastEditTime: 2024-04-22 17:28:11
+ * @FilePath: \landlords-client\assets\scripts\hallscene\prefabs_script\creatRoom.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
+import myglobal from "mygolbal.js"
+import http from "http.js";
+
 cc.Class({
   extends: cc.Component,
   properties: {
@@ -6,11 +16,11 @@ cc.Class({
     tip: cc.Prefab,
   },
   onLoad() {
-    this._event = cc.ws.on(cc.ws.MESSAGE, this.onMessage.bind(this))
-    cc.ws.send({ action: cc.wsApi.roomList })
+    // this._event = cc.ws.on(cc.ws.MESSAGE, this.onMessage.bind(this))
+    // cc.ws.send({ action: cc.wsApi.roomList })
   },
   onDestroy() {
-    cc.ws.off(this._event)
+    // cc.ws.off(this._event)
   },
   onMessage(e) {
     if (!e) return
@@ -49,12 +59,31 @@ cc.Class({
     this.node.destroy()
   },
   // 进入游戏房间
-  onButtonClick(event, room_id) {
+  onJoinRoomHandler(event, level) {
     const data = {
-      action: cc.wsApi.roomJoinSelf,
-      data: room_id
+      userId: myglobal.playerData.userId,
+      roomLevel: level,
     }
-    cc.ws.send(data)
+    http.post(http.joinRoom, data, (res) => {
+        console.log(res)
+        if (res.code) {
+            this.tipNode && this.tipNode.destroy();
+            this.tipNode = cc.instantiate(this.tip);
+            this.tipNode.getComponent(cc.Label).string = res.msg;
+            this.tipNode.parent = this.node;
+            return;
+        }
+        myglobal.playerData.roomId = res.data.room_level
+        myglobal.playerData.tableId = res.data.table_id
+        cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
+        cc.director.loadScene('gameScene')
+        this.onBtnClose()
+    });
+    // const data = {
+    //   action: cc.wsApi.roomJoinSelf,
+    //   data: level
+    // }
+    // cc.ws.send(data)
   },
 
 });
