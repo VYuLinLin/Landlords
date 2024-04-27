@@ -1,5 +1,6 @@
 import { EventEmitter } from "./eventEmitter";
 import wsAPI from "./wsAPI"
+import http from "http.js"
 cc.wsApi = wsAPI
 
 export default {
@@ -36,10 +37,10 @@ export class WS extends EventEmitter {
      * @param {string} url
      * @memberof WS
      */
-    connect(url = 'ws://127.0.0.1:8181/ws/') {
+    connect(url = 'ws://localhost/ws/') {
         if (!this._sock || this._sock.readyState !== WebSocket.OPEN) {
             
-            url += `?id=${myglobal.playerData.userId}&name=${myglobal.playerData.userName}`
+            url += `?id=${myglobal.playerData.userId}`
             this._sock = new WebSocket(url);
             // this._sock.binaryType = 'arraybuffer';
             this._sock.onopen = this._onOpen.bind(this);

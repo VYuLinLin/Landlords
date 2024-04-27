@@ -1,6 +1,10 @@
-import myglobal from "../mygolbal.js"
+import myglobal from "mygolbal.js"
+import http from "http.js";
+import ws from "websocket.js"
+
 const ddzConsts= require('ddzConstants')
 const ddzData = require('ddzData')
+
 cc.Class({
   extends: cc.Component,
   properties: {
@@ -22,7 +26,7 @@ cc.Class({
     this.roomid_label.string = ddzConsts.roomNames[myglobal.playerData.roomId-1] + '：' + myglobal.playerData.tableId
     
     console.log("game load")
-    // ws.initWS()
+    ws.initWS()
     console.log("game load end")
 
     this.playerNodeList = []
@@ -324,7 +328,23 @@ cc.Class({
   },
   // 返回大厅
   onGoback() {
-    cc.ws.send({ action: cc.wsApi.roomLeave })
+    const data = {
+        userId: myglobal.playerData.userId,
+    }
+    http.post(http.exitRoom, data, (res) => {
+        if (res.code) {
+            this.tipNode && this.tipNode.destroy();
+            this.tipNode = cc.instantiate(this.tip);
+            this.tipNode.getComponent(cc.Label).string = res.msg;
+            this.tipNode.parent = this.node;
+            return;
+        }
+        myglobal.playerData.roomId = ''
+        myglobal.playerData.tableId = ''
+        cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
+        cc.director.loadScene('hallScene')
+    })
+    // cc.ws.send({ action: cc.wsApi.roomLeave })
   },
   // 准备
   onBtnReadey(event) {

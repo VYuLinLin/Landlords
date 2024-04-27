@@ -1,4 +1,4 @@
-const httpUrl = 'http://localhost:8528'
+const httpUrl = 'http://localhost'
 /**
  * Http 请求封装
  */
@@ -7,6 +7,7 @@ const httpUrl = 'http://localhost:8528'
     register: '/register',
     logout: '/logout',
     joinRoom: '/joinRoom',
+    exitRoom: '/exitRoom',
     /**
      * get请求
      * @param {string} route 
