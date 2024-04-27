@@ -1,11 +1,11 @@
 package pokerlogic
 
 import (
+	"landlords/internal/game/player"
 	"math/rand"
 	"reflect"
 	"time"
 
-	"landlords/internal/player"
 	p "landlords/internal/poker"
 )
 

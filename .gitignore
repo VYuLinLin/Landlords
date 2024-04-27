@@ -33,5 +33,4 @@ client/landlords-client/packages
 client/landlords-client/local
 client/landlords-client/dist
 
-server/pkg/
-server/landlords/vendor/
+server/src/landlords/internal/logs/

@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-
+	_ "landlords/internal/conf"
+	_ "landlords/internal/db"
 	_ "landlords/internal/game/room"
-	_ "landlords/internal/mysql"
-	_ "landlords/internal/socketio"
+	_ "landlords/internal/router"
 	"landlords/internal/version"
 )
 

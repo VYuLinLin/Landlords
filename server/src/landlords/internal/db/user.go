@@ -1,9 +1,10 @@
-package mysql
+package db
 
 import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/astaxie/beego/logs"
 	"time"
 )
 
@@ -87,7 +88,7 @@ func UpdateUserRoomIdAndTableId(roomID int, tableId int64, p *User) (err error) 
 	if p.ID <= 0 {
 		return errors.New("用户ID不能为空")
 	}
-	result, err := db.Exec(`UPDATE users SET room_id=?, table_id=? WHERE id=?;`, roomID, tableId, p.ID)
-	fmt.Println(result)
+	_, err = db.Exec(`UPDATE users SET room_id=?, table_id=? WHERE id=?;`, roomID, tableId, p.ID)
+	logs.Info("UpdateUserRoomIdAndTableId", err)
 	return err
 }

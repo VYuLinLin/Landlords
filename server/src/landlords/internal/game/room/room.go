@@ -3,8 +3,9 @@ package room
 import (
 	"errors"
 	"fmt"
+	"landlords/internal/db"
+	"landlords/internal/game/player"
 	"landlords/internal/game/table"
-	"landlords/internal/mysql"
 	"strconv"
 )
 
@@ -46,7 +47,7 @@ func init() {
 }
 
 // JoinRoom 进入房间
-func JoinRoom(u *mysql.User, level string) (room *Info, err error) {
+func JoinRoom(u *db.User, level string) (room *Info, err error) {
 	r := *Rooms
 	room = &Info{
 		RoomName:  r[level].RoomName,
@@ -58,7 +59,7 @@ func JoinRoom(u *mysql.User, level string) (room *Info, err error) {
 		// 是否已经在座位中
 		for i, l := 0, len(tables); i < l; i++ {
 			t := tables[i]
-			if t.IsAtTable(u) {
+			if t.IsAtTable(u.ID) != nil {
 				room.Table = t
 				break
 			}
@@ -86,11 +87,28 @@ func JoinRoom(u *mysql.User, level string) (room *Info, err error) {
 	if room.Table != nil {
 		roomId := 0
 		if roomId, err = strconv.Atoi(level); err == nil {
-			err = mysql.UpdateUserRoomIdAndTableId(roomId, room.Table.TableID, u)
+			err = db.UpdateUserRoomIdAndTableId(roomId, room.Table.TableID, u)
+		} else {
+			room.Table.LeaveTable(u)
 		}
 		fmt.Println("UpdateUserTableID", err)
 	}
 	return room, err
+}
+
+// ExitRoom 离开房间
+func ExitRoom(u *db.User) (err error) {
+	r := *Rooms
+	tables := r[strconv.Itoa(u.ROOMID)].Tables
+	for i, l := 0, len(tables); i < l; i++ {
+		t := tables[i]
+		if t.IsAtTable(u.ID) != nil {
+			t.LeaveTable(u)
+			err = db.UpdateUserRoomIdAndTableId(0, 0, u)
+			break
+		}
+	}
+	return err
 }
 
 // GetTableData 根据等级、桌子id获取桌面信息
@@ -115,4 +133,20 @@ func GetTableData(id int64) (room *Info, err error) {
 		return nil, errors.New("table ID is Error")
 	}
 	return room, err
+}
+
+// GetPlayerData 根据用户id查找当前游戏中的用户
+func GetPlayerData(id int) *player.Player {
+	r := *Rooms
+	for s, val := range r {
+		fmt.Println(s, val)
+		for i, l := 0, len(val.Tables); i < l; i++ {
+			t := val.Tables[i]
+			u := t.IsAtTable(id)
+			if u != nil {
+				return u
+			}
+		}
+	}
+	return nil
 }
