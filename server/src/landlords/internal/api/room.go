@@ -62,10 +62,10 @@ func (r *RoomApi) ExitRoom(p interface{}) (err error) {
 // GetTable 根据桌子id获取桌子信息
 func (r *RoomApi) GetTable(p interface{}) (d *room.Info, err error) {
 	m := p.(map[string]interface{})
-	if m["roomLevel"] == nil || m["tableId"] == nil || m["tableId"] == "" {
+	if m["tableId"] == nil || m["tableId"] == "" {
 		return nil, errors.New("tableId不能为空")
 	}
-	id := m["tableId"].(int64)
-	d, err = room.GetTableData(id)
+	id := m["tableId"].(float64)
+	d, err = room.GetTableData(int64(id))
 	return d, err
 }

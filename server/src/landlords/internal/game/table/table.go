@@ -9,73 +9,86 @@ import (
 )
 
 type Table struct {
-	TableID    int64          `json:"table_id"`
-	CreateTime string         `json:"create_time"`
-	Player1    *player.Player `json:"player_1"`
-	Player2    *player.Player `json:"player_2"`
-	Player3    *player.Player `json:"player_3"`
+	TableID    int64            `json:"table_id"`
+	CreateTime string           `json:"create_time"`
+	Status     int              `json:"status"`
+	Creator    *player.Player   `json:"creator"`
+	Players    []*player.Player `json:"players"`
+	//Player1    *player.Player `json:"player_1"`
+	//Player2    *player.Player `json:"player_2"`
+	//Player3    *player.Player `json:"player_3"`
 }
 
 // IsAtTable 是否已经在座位中
 func (t *Table) IsAtTable(id int) *player.Player {
-	if t.Player1 != nil && t.Player1.ID == id {
-		return t.Player1
-	} else if t.Player2 != nil && t.Player2.ID == id {
-		return t.Player2
-	} else if t.Player3 != nil && t.Player3.ID == id {
-		return t.Player3
+	for i := 0; i < len(t.Players); i++ {
+		if t.Players[i] != nil && t.Players[i].ID == id {
+			return t.Players[i]
+		}
 	}
 	return nil
 }
 
-// JoinTable 加入空位
-func (t *Table) JoinTable(u *db.User) error {
-	err := errors.New("桌子人员已满")
-	if t.Player1 == nil {
-		t.Player1 = &player.Player{User: u}
-		err = nil
-	} else if t.Player2 == nil {
-		t.Player2 = &player.Player{User: u}
-		err = nil
-	} else if t.Player3 == nil {
-		t.Player3 = &player.Player{User: u}
-		err = nil
+// 重置用户前后顺序
+func (t *Table) setPlayerNext() {
+	pCount := len(t.Players)
+	for i := 0; i < pCount; i++ {
+		player := t.Players[i]
+		player.Next = t.Players[(i+1)%pCount]
 	}
+}
+
+// JoinTable 加入空位
+func (t *Table) JoinTable(u *db.User) (err error) {
+	if len(t.Players) < 3 {
+		return errors.New("桌子人员已满")
+	}
+
+	t.Players = append(t.Players, &player.Player{User: u})
+
+	t.setPlayerNext()
+
 	return err
 }
 
 // LeaveTable 离开桌子
 func (t *Table) LeaveTable(u *db.User) (ok bool) {
-	if t.Player1.ID == u.ID {
-		if t.Player1.Conn != nil {
-			err := t.Player1.Conn.Close()
-			logs.Info("LeaveTable Player1", err)
+	var newPlayers []*player.Player
+	for i := 0; i < len(t.Players); i++ {
+		player := t.Players[i]
+		if u.ID == player.ID {
+			// 关闭ws
+			err := player.Conn.Close()
+			logs.Info("LeaveTable Player[%s]:", player.ID, err)
+
+			// 删除房主
+			if u.ID == t.Creator.ID {
+				t.Creator = nil
+			}
+
+			ok = true
+			break
 		}
-		t.Player1 = nil
-		ok = true
-	} else if t.Player2.ID == u.ID {
-		if t.Player2.Conn != nil {
-			err := t.Player2.Conn.Close()
-			logs.Info("LeaveTable Player2", err)
-		}
-		t.Player2 = nil
-		ok = true
-	} else if t.Player3.ID == u.ID {
-		if t.Player3.Conn != nil {
-			err := t.Player3.Conn.Close()
-			logs.Info("LeaveTable Player3", err)
-		}
-		t.Player3 = nil
-		ok = true
+		newPlayers = append(newPlayers, player)
 	}
+	t.Players = newPlayers
+	t.setPlayerNext()
+
+	// 转移房主
+	if t.Creator == nil && len(newPlayers) > 0 {
+		t.Creator = newPlayers[0]
+	}
+
 	return ok
 }
 
 func JoinNewTable(u *db.User) (t *Table, err error) {
 	now := time.Now()
+	creator := &player.Player{User: u}
 	return &Table{
 		TableID:    now.Unix(),
 		CreateTime: now.Format("2006-01-02 15:04:05"),
-		Player1:    &player.Player{User: u},
+		Creator:    creator,
+		Players:    []*player.Player{creator},
 	}, err
 }

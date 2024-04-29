@@ -98,6 +98,9 @@ func JoinRoom(u *db.User, level string) (room *Info, err error) {
 
 // ExitRoom 离开房间
 func ExitRoom(u *db.User) (err error) {
+	if u.ROOMID <= 0 {
+		return err
+	}
 	r := *Rooms
 	tables := r[strconv.Itoa(u.ROOMID)].Tables
 	for i, l := 0, len(tables); i < l; i++ {
@@ -111,10 +114,11 @@ func ExitRoom(u *db.User) (err error) {
 	return err
 }
 
-// GetTableData 根据等级、桌子id获取桌面信息
+// GetTableData 根据桌子id获取桌面信息
 func GetTableData(id int64) (room *Info, err error) {
 	room = &Info{}
 	r := *Rooms
+Exit:
 	for s, val := range r {
 		fmt.Println(s, val)
 		for i, l := 0, len(val.Tables); i < l; i++ {
@@ -123,14 +127,14 @@ func GetTableData(id int64) (room *Info, err error) {
 				room.RoomName = val.RoomName
 				room.RoomLevel = val.RoomLevel
 				room.Table = t
-				break
+				break Exit
 			}
 		}
 	}
 	// 匹配桌子id
 
 	if room.Table == nil {
-		return nil, errors.New("table ID is Error")
+		err = errors.New("table ID is Error")
 	}
 	return room, err
 }

@@ -51,7 +51,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		data.Msg = err1.Error()
 		log.Println(err1)
 	}
-	fmt.Println("request parameter:", response)
+	logs.Info("http 请求数据体[%s]:", r.URL.Path, response)
 	var res any
 	var err2 error
 	var loginApi = &api.LoginApi{}
@@ -70,19 +70,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	case "/getTable":
 		res, err2 = roomApi.GetTable(response)
 	case "/ws/":
-		err2 = StartServeWs(w, r)
+		err2 = api.StartServeWs(w, r)
 		logs.Error("/ws", err2)
+		return
 	}
 	if err2 != nil {
 		data.Code = 1
 		data.Msg = err2.Error()
-		log.Println(err2)
 	} else {
 		data.Data = res
 	}
 
-	logs.Info("http 返回数据体", data, w)
 	strParams, _ := json.Marshal(data)
+	logs.Info("http 返回数据体[%s]: %s", r.URL.Path, strParams)
 	w.Write(strParams)
 }
 func init() {

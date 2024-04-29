@@ -16,8 +16,10 @@ import (
 type Player struct {
 	*db.User
 	Conn  *websocket.Conn `json:"-"`
-	cards []p.Poker
-	Mux   sync.RWMutex `json:"-"`
+	Ready int             `json:"ready"`
+	Cards []p.Poker       `json:"cards"`
+	Next  *Player         `json:"next"` // 链表
+	Mux   sync.RWMutex    `json:"-"`
 }
 
 // Players information
@@ -39,6 +41,7 @@ type Response struct {
 	Data   interface{} `json:"data"`
 }
 
+// ws 配置相关
 const (
 	writeWait      = 1 * time.Second
 	pongWait       = 60 * time.Second
@@ -52,19 +55,49 @@ const (
 	ResHeart = "2"
 )
 
-var (
-	newline = []byte{'\n'}
-	space   = []byte{' '}
+// ws 推送主题
+const (
+	UserUpdate    = "user/update"     // 更新用户信息
+	RoomList      = "room/list"       // 房间列表
+	RoomJoinSelf  = "room/join/self"  // 进入房间
+	RoomJoinOther = "room/join/other" // 其他玩家进入房间
+	RoomLeave     = "room/leave"      // 离开房间
+	TableInfo     = "table/info"      // 桌子信息
+	TableStatus   = "table/status"    // 桌子状态
+
+	TableUpdate      = "table/data/update" // 桌子状态
+	TableJoin        = "table/join"        // 进入桌子
+	PlayerReady      = "player/ready"      // 玩家准备
+	PlayerDeal       = "player/deal"       // 发牌
+	TableCallPoints  = "table/callPoints"  // 抢地主
+	PlayerCallPoints = "player/callPoints" // 玩家叫分
+	TableHoleCards   = "table/holeCards"   // 显示底牌
 )
 
-func (c *Player) SendMsg(action string, code int, data interface{}) {
+var (
+	oldLine = []byte{'\n'}
+	newLine = []byte{' '}
+)
+
+// AllSendMsg 推送给座位上的所有玩家
+func (c *Player) AllSendMsg(action string, data interface{}) {
+	c.SendMsg(action, 200, data)
+	if c.Next != nil {
+		c.Next.SendMsg(action, 200, data)
+		if c.Next.Next != nil {
+			c.Next.Next.SendMsg(action, 200, data)
+		}
+	}
+}
+
+// SendMsg 推送给座位上的某一位玩家
+func (c *Player) SendMsg(action string, code int, data interface{}) (err error) {
 	res := &Response{
 		Action: action,
 		Code:   code,
 		Data:   data,
 	}
 	var msgByte []byte
-	var err error
 	if action == ResHeart {
 		heart, _ := strconv.Atoi(ResHeart)
 		msgByte, _ = json.Marshal(heart)
@@ -81,32 +114,35 @@ func (c *Player) SendMsg(action string, code int, data interface{}) {
 	//	return
 	//}
 	c.Mux.Lock()
-	w, err := c.Conn.NextWriter(websocket.BinaryMessage)
-
+	w, err := c.Conn.NextWriter(websocket.TextMessage)
 	if err != nil {
-		err = c.Conn.Close()
-		if err != nil {
-			logs.Error("close client err: %v", err)
-		}
+		return err
 	}
 	_, err = w.Write(msgByte)
 	c.Mux.Unlock()
 
 	if err != nil {
 		logs.Error("Write msg [%v] err: %v", string(msgByte), err)
+		return err
 	}
-	if err = w.Close(); err != nil {
-		err = c.Conn.Close()
-		if err != nil {
-			logs.Error("close err: %v", err)
-		}
-	}
+	return w.Close()
 }
 
+// CloseWS 关闭websocket
+func (c *Player) CloseWS() (err error) {
+	c.Conn.Close()
+	c.Conn = nil
+	return err
+}
+
+// ReadPump 心跳、消息接受
 func (c *Player) ReadPump() {
 	defer func() {
-		logs.Debug("readPump exit")
-		c.Conn.Close()
+		err := c.Conn.Close()
+		if err != nil {
+			logs.Error("ws 关闭错误：", err)
+		}
+		logs.Debug("readPump exit", *c.Conn)
 	}()
 	c.Conn.SetReadLimit(maxMessageSize)
 	//c.conn.SetReadDeadline(time.Now().Add(pongWait))
@@ -123,26 +159,29 @@ func (c *Player) ReadPump() {
 			c.SendMsg(ResHeart, 0, nil)
 			continue
 		}
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
+		message = bytes.TrimSpace(bytes.Replace(message, oldLine, newLine, -1))
 		req := &Request{}
-		//var data []interface{}
 		err = json.Unmarshal(message, &req)
 		if err != nil {
 			logs.Error("message unmarshal1 err, user_id[%d] err:%v", c.ID, err)
 		} else {
-			wsRequest(req, c)
+			c.wsRequest(req)
 		}
 	}
 }
 
 // wsRequest 处理websocket请求
-func wsRequest(r *Request, client *Player) {
+func (c *Player) wsRequest(r *Request) {
 	defer func() {
 		if err := recover(); err != nil {
 			logs.Error("wsRequest panic:%v ", err)
-			client.SendMsg(r.Action, 500, err)
+			c.SendMsg(r.Action, 500, err)
 		}
 	}()
 	switch r.Action {
+	case PlayerReady:
+		data := map[int]int{c.ID: 1}
+		c.Ready = 1
+		c.AllSendMsg(PlayerReady, data)
 	}
 }

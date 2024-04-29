@@ -1,4 +1,4 @@
-package router
+package api
 
 import (
 	"fmt"
@@ -12,8 +12,6 @@ import (
 )
 
 var (
-	newline  = []byte{'\n'}
-	space    = []byte{' '}
 	upGrader = websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
@@ -32,11 +30,14 @@ var (
 )
 
 // StartServeWs 初始化websocket长链接
-func StartServeWs(w http.ResponseWriter, r *http.Request) error {
-
+func StartServeWs(w http.ResponseWriter, r *http.Request) (err error) {
+	//defer func() {
+	//	fmt.Println("StartServeWs, defer", err.Error())
+	//	w.Write([]byte(err.Error()))
+	//}()
 	params := r.URL.Query()
 	userId, err := strconv.Atoi(params.Get("id"))
-	logs.Debug("strconv.Atoi(params.Get", userId)
+	logs.Debug("strconv.Atoi(params.Get", userId, err)
 	if err != nil {
 		log.Panicf("id conversion err:%v\n\n", err)
 		return err
