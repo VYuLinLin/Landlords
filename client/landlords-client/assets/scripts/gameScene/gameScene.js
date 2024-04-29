@@ -1,3 +1,11 @@
+/*
+ * @Author: v vvv@888.com
+ * @Date: 2022-05-09 13:33:49
+ * @LastEditors: v vvv@888.com
+ * @LastEditTime: 2024-04-29 18:05:18
+ * @FilePath: \landlords-client\assets\scripts\gameScene\gameScene.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import myglobal from "mygolbal.js"
 import http from "http.js";
 import ws from "websocket.js"
@@ -30,15 +38,43 @@ cc.Class({
     console.log("game load end")
 
     this.playerNodeList = []
-    this._event = cc.ws.on(cc.ws.MESSAGE, this.onMessage.bind(this))
-    const data = {
-      action: cc.wsApi.tableInfo,
-      data: {
-        room_id: myglobal.playerData.roomId,
-        table_id: myglobal.playerData.tableId,
-      }
+    if (cc.ws) {
+      this._event = cc.ws.on(cc.ws.MESSAGE, this.onMessage.bind(this))
     }
-    cc.ws.send(data)
+
+    const data = {
+      tableId: myglobal.playerData.tableId,
+    }
+    http.post(http.getTable, data, (res) => {
+        if (res.code) {
+            this.tipNode && this.tipNode.destroy();
+            this.tipNode = cc.instantiate(this.tip);
+            this.tipNode.getComponent(cc.Label).string = res.msg;
+            this.tipNode.parent = this.node;
+            return;
+        }
+        console.log(res.data)
+        const {status, creator, players} = res.data.table
+
+        myglobal.playerData.creator = creator.id
+        ddzData.gameState = status
+        this.btn_ready.active = status < ddzConsts.gameStatus.GAMESTART // 准备按钮
+        for (var i = 0; i < this.playerNodeList.length; i++) {
+          var node = this.playerNodeList[i]
+          node.destroy()
+        }
+        players.map(c => {
+          this.addPlayerNode(c)
+        })
+    })
+    // const data = {
+    //   action: cc.wsApi.tableInfo,
+    //   data: {
+    //     room_id: myglobal.playerData.roomId,
+    //     table_id: myglobal.playerData.tableId,
+    //   }
+    // }
+    // cc.ws.send(data)
 
     cc.audioEngine.stopAll()
     cc.audioEngine.play(this.bjMusic, true)
@@ -216,9 +252,11 @@ cc.Class({
     // $socket.on('change_master_notify', this.masterNotify, this)
   },
   onDestroy() {
-    cc.ws.off(this._event)
-    cc.ws.close()
-    cc.ws = null
+    if (cc.ws) {
+      cc.ws.off(this._event)
+      cc.ws.close()
+      cc.ws = null
+    }
     if (!CC_EDITOR) {
       ddzData.gameStateNotify.removeListener(this.gameStateHandler, this)
       cc.audioEngine.stopAll()
@@ -384,7 +422,8 @@ cc.Class({
   // },
   // 添加玩家节点
   addPlayerNode(player_data) {
-    var index = player_data.user_id === myglobal.playerData.userId ? 0 : player_data.next_id === myglobal.playerData.userId ? 2 : 1
+    const {id, next} = player_data
+    var index = id === myglobal.playerData.userId ? 0 : next.id === myglobal.playerData.userId ? 2 : 1
     player_data.seat_index = index
     var playernode_inst = cc.instantiate(this.player_node_prefabs)
     playernode_inst.parent = this.players_seat_pos.children[index]

@@ -120,10 +120,10 @@ cc.Class({
   init_data(data) {
     const index = data.seat_index
     //data:{"userId":"2117836","userName":"tiny543","avatarUrl":"http://xxx","coin":1000}
-    this.userId = data.user_id
+    this.userId = data.id
     // this.account_label.string = data.accountid
     this.updateCreator()
-    this.nickname_label.string = data.user_name + '_' + data.user_id
+    this.nickname_label.string = data.name + '_' + data.id
     this.globalcount_label.string = data.coin
     this.cardlist_node = []
     this.seat_index = index

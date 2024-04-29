@@ -8,6 +8,7 @@ const httpUrl = 'http://localhost'
     logout: '/logout',
     joinRoom: '/joinRoom',
     exitRoom: '/exitRoom',
+    getTable: '/getTable',
     /**
      * get请求
      * @param {string} route 

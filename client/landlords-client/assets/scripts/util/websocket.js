@@ -1,6 +1,5 @@
 import { EventEmitter } from "./eventEmitter";
 import wsAPI from "./wsAPI"
-import http from "http.js"
 cc.wsApi = wsAPI
 
 export default {
@@ -99,27 +98,24 @@ export class WS extends EventEmitter {
         const _this = this;
         if (event.data instanceof Blob) {
             if (event.data.text) {
-                event.data.text().then((res) => {
-                    res = JSON.parse(res)
-                    if (res === wsAPI.RES_HEART) return
-                    console.log("message", res)
-                    _this.emit(_this.MESSAGE, res)
-                });
+                event.data.text().then(_this._parseMsgAndEmit);
             } else {
                 // 兼容QQ浏览器等无Blob实例方法的浏览器
                 var reader = new FileReader();
                 reader.onload = function (event) {
-                    res = JSON.parse(event.target.result)
-                    if (res === wsAPI.RES_HEART) return
-                    console.log("message", res)
-                    _this.emit(_this.MESSAGE, res)
+                    _this._parseMsgAndEmit(event.target.result)
                 };
                 reader.readAsText(event.data);
             }
         } else {
-            console.log("websocket", JSON.parse(event));
-            this.emit(this.MESSAGE, event);
+            _this._parseMsgAndEmit(event.data)
         }
+    }
+    _parseMsgAndEmit(res) {
+        res = JSON.parse(res)
+        if (res === wsAPI.RES_HEART) return
+        console.log("ws 消息: ", res)
+        this.emit(this.MESSAGE, res);
     }
     /**
      * 发送数据
