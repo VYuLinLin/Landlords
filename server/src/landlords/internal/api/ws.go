@@ -37,7 +37,6 @@ func StartServeWs(w http.ResponseWriter, r *http.Request) (err error) {
 	//}()
 	params := r.URL.Query()
 	userId, err := strconv.Atoi(params.Get("id"))
-	logs.Debug("strconv.Atoi(params.Get", userId, err)
 	if err != nil {
 		log.Panicf("id conversion err:%v\n\n", err)
 		return err

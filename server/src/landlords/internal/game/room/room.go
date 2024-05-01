@@ -86,10 +86,24 @@ func JoinRoom(u *db.User, level string) (room *Info, err error) {
 	}
 	if room.Table != nil {
 		roomId := 0
+		tableId := room.Table.TableID
 		if roomId, err = strconv.Atoi(level); err == nil {
-			err = db.UpdateUserRoomIdAndTableId(roomId, room.Table.TableID, u)
+			// 更新mysql
+			err = db.UpdateUserRoomIdAndTableId(roomId, tableId, u)
+			// ws推送
+			if p := GetPlayerData(u.ID); err == nil && p != nil {
+				p.ROOMID = roomId
+				p.TABLEID = tableId
+				data := map[string]any{
+					"id":       p.ID,
+					"name":     p.NAME,
+					"next_id":  p.NextID,
+					"table_id": tableId,
+				}
+				room.Table.AllSendMsg(player.RoomJoin, data)
+			}
 		} else {
-			room.Table.LeaveTable(u)
+			err = room.Table.LeaveTable(u)
 		}
 		fmt.Println("UpdateUserTableID", err)
 	}
@@ -106,8 +120,7 @@ func ExitRoom(u *db.User) (err error) {
 	for i, l := 0, len(tables); i < l; i++ {
 		t := tables[i]
 		if t.IsAtTable(u.ID) != nil {
-			t.LeaveTable(u)
-			err = db.UpdateUserRoomIdAndTableId(0, 0, u)
+			err = t.LeaveTable(u)
 			break
 		}
 	}
@@ -134,7 +147,7 @@ Exit:
 	// 匹配桌子id
 
 	if room.Table == nil {
-		err = errors.New("table ID is Error")
+		err = errors.New("桌子id匹配为空")
 	}
 	return room, err
 }

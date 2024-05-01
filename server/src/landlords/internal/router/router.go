@@ -42,8 +42,6 @@ func parseResponse(r *http.Request) (res interface{}, err error) {
 func handler(w http.ResponseWriter, r *http.Request) {
 	data := &responseMsg{0, "success", NullStruct{}}
 	fmt.Println("URL", r.URL)
-	fmt.Println("URL.Path", r.URL.Path)
-	fmt.Println("Host", r.Host)
 
 	response, err1 := parseResponse(r)
 	if err1 != nil {
@@ -51,7 +49,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		data.Msg = err1.Error()
 		log.Println(err1)
 	}
-	logs.Info("http 请求数据体[%s]:", r.URL.Path, response)
+	logs.Info("http 请求数据体[%s]: %s", r.URL.Path, response)
 	var res any
 	var err2 error
 	var loginApi = &api.LoginApi{}
@@ -74,14 +72,20 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		logs.Error("/ws", err2)
 		return
 	}
+
 	if err2 != nil {
 		data.Code = 1
 		data.Msg = err2.Error()
 	} else {
 		data.Data = res
 	}
-
-	strParams, _ := json.Marshal(data)
+	strParams, err2 := json.Marshal(data)
+	if err2 != nil {
+		data.Code = 1
+		data.Msg = err2.Error()
+		data.Data = nil
+		strParams, _ = json.Marshal(data)
+	}
 	logs.Info("http 返回数据体[%s]: %s", r.URL.Path, strParams)
 	w.Write(strParams)
 }
