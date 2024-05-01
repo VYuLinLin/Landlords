@@ -46,7 +46,7 @@ export default {
     RSP_RESTART: 46,
 
     roomList: 'room/list',
-    roomJoinSelf: 'room/join/self',    // 玩家进入房间
+    roomJoin: 'room/join',    // 玩家进入房间
     roomJoinOther: 'room/join/other',    // 其他玩家进入房间
     roomLeave: 'room/leave',    // 玩家离开
     tableInfo: 'table/info', // 当前桌子和玩家信息

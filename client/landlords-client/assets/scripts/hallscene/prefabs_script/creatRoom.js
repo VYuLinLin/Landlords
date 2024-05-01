@@ -44,16 +44,16 @@ cc.Class({
         label.string = entrance_fee
       }
     }
-    if (e.action === cc.wsApi.roomJoinSelf) {
-      if (e.code === 200) {
-        const {room_id, table_id} = e.data
-        myglobal.playerData.roomId = room_id
-        myglobal.playerData.tableId = table_id
-        cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
-        cc.director.loadScene("gameScene")
-        this.node.destroy()
-      }
-    }
+    // if (e.action === cc.wsApi.roomJoinSelf) {
+    //   if (e.code === 200) {
+    //     const {room_id, table_id} = e.data
+    //     myglobal.playerData.roomId = room_id
+    //     myglobal.playerData.tableId = table_id
+    //     cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
+    //     cc.director.loadScene("gameScene")
+    //     this.node.destroy()
+    //   }
+    // }
   },
   onBtnClose() {
     this.node.destroy()

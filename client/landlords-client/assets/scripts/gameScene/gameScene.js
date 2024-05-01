@@ -2,7 +2,7 @@
  * @Author: v vvv@888.com
  * @Date: 2022-05-09 13:33:49
  * @LastEditors: v vvv@888.com
- * @LastEditTime: 2024-04-29 18:05:18
+ * @LastEditTime: 2024-05-02 00:34:29
  * @FilePath: \landlords-client\assets\scripts\gameScene\gameScene.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -292,24 +292,24 @@ cc.Class({
         myglobal.playerData.creator = e.data.creator
         ddzData.gameState = e.data.state
         break
-      case cc.wsApi.roomJoinOther:
+      case cc.wsApi.roomJoin:
         this.addPlayerNode(e.data)
         break
       case cc.wsApi.roomLeave:
-        const {userId, creatorId} = e.data
-        myglobal.playerData.creator = creatorId
-        if (myglobal.playerData.userId === userId) {
+        const {user_id, creator_id} = e.data
+        myglobal.playerData.creator = creator_id
+        if (myglobal.playerData.userId === user_id) {
           ddzData.gameState = ddzConsts.gameStatus.INVALID
           myglobal.playerData.roomId = ''
           cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
           cc.director.loadScene("hallScene")
         } else {
-          const [player] = this.playerNodeList.filter(a => a.getComponent("player_node").userId === userId)
+          const [player] = this.playerNodeList.filter(a => a.getComponent("player_node").userId === user_id)
           if (!player) return
           player.destroy()
           this.playerNodeList = this.playerNodeList.filter(a => {
             const node = a.getComponent("player_node")
-            if (node.userId !== userId) {
+            if (node.userId !== user_id) {
               node.updateCreator()
               return true
             }
@@ -422,8 +422,10 @@ cc.Class({
   // },
   // 添加玩家节点
   addPlayerNode(player_data) {
-    const {id, next} = player_data
-    var index = id === myglobal.playerData.userId ? 0 : next.id === myglobal.playerData.userId ? 2 : 1
+    const {id, next_id, table_id} = player_data
+    if (table_id !== myglobal.playerData.tableId) return
+
+    var index = id === myglobal.playerData.userId ? 0 : next_id === myglobal.playerData.userId ? 2 : 1
     player_data.seat_index = index
     var playernode_inst = cc.instantiate(this.player_node_prefabs)
     playernode_inst.parent = this.players_seat_pos.children[index]
