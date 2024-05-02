@@ -150,7 +150,7 @@ cc.Class({
   updateReadyStatus(status) {
     if (this.seat_index !== 0) {
       this.unreadyimage.active = !status
-      this.readyimage.active = status
+      this.readyimage.active = !!status
     }
   },
   gameStateHandler(state) {

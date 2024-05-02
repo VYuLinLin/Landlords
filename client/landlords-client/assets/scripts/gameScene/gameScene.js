@@ -2,7 +2,7 @@
  * @Author: v vvv@888.com
  * @Date: 2022-05-09 13:33:49
  * @LastEditors: v vvv@888.com
- * @LastEditTime: 2024-05-02 00:34:29
+ * @LastEditTime: 2024-05-02 23:28:24
  * @FilePath: \landlords-client\assets\scripts\gameScene\gameScene.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -42,31 +42,7 @@ cc.Class({
       this._event = cc.ws.on(cc.ws.MESSAGE, this.onMessage.bind(this))
     }
 
-    const data = {
-      tableId: myglobal.playerData.tableId,
-    }
-    http.post(http.getTable, data, (res) => {
-        if (res.code) {
-            this.tipNode && this.tipNode.destroy();
-            this.tipNode = cc.instantiate(this.tip);
-            this.tipNode.getComponent(cc.Label).string = res.msg;
-            this.tipNode.parent = this.node;
-            return;
-        }
-        console.log(res.data)
-        const {status, creator, players} = res.data.table
-
-        myglobal.playerData.creator = creator.id
-        ddzData.gameState = status
-        this.btn_ready.active = status < ddzConsts.gameStatus.GAMESTART // 准备按钮
-        for (var i = 0; i < this.playerNodeList.length; i++) {
-          var node = this.playerNodeList[i]
-          node.destroy()
-        }
-        players.map(c => {
-          this.addPlayerNode(c)
-        })
-    })
+    this.getTable()
     // const data = {
     //   action: cc.wsApi.tableInfo,
     //   data: {
@@ -284,6 +260,7 @@ cc.Class({
           var node = this.playerNodeList[i]
           node.destroy()
         }
+        this.playerNodeList = []
         clients.map(c => {
           this.addPlayerNode(c)
         })
@@ -293,7 +270,8 @@ cc.Class({
         ddzData.gameState = e.data.state
         break
       case cc.wsApi.roomJoin:
-        this.addPlayerNode(e.data)
+        // 用户进入后需要更新座位顺序，所以这里重新请求获取数据
+        this.getTable()
         break
       case cc.wsApi.roomLeave:
         const {user_id, creator_id} = e.data
@@ -321,12 +299,12 @@ cc.Class({
         for (let i = 0; i < this.playerNodeList.length; i++) {
           const playerNode = this.playerNodeList[i].getComponent("player_node")
           const {seat_index, userId} = playerNode
-          if (seat_index === 0 && e.data[userId]) {
-            this.btn_ready.active = false
+          if (seat_index === 0) {
+            this.btn_ready.active = !e.data[userId]
+          } else {
+            playerNode.updateReadyStatus(e.data[userId])
           }
-          playerNode.updateReadyStatus(e.data[userId])
         }
-        // this.btn_ready.active = false
         // ddzData.gameState = ddzConsts.gameStatus.GAMESTART
         break
       case cc.wsApi.playerDeal:
@@ -343,6 +321,34 @@ cc.Class({
         window.$socket.emit('canrob_notify', e.data)
         break
     }
+  },
+  getTable() {
+    const data = {
+      tableId: myglobal.playerData.tableId,
+    }
+    http.post(http.getTable, data, (res) => {
+        if (res.code) {
+            this.tipNode && this.tipNode.destroy();
+            this.tipNode = cc.instantiate(this.tip);
+            this.tipNode.getComponent(cc.Label).string = res.msg;
+            this.tipNode.parent = this.node;
+            return;
+        }
+        console.log(res.data)
+        const {status, creator, players} = res.data.table
+
+        myglobal.playerData.creator = creator.id
+        ddzData.gameState = status 
+        
+        for (var i = 0; i < this.playerNodeList.length; i++) {
+          var node = this.playerNodeList[i]
+          node.destroy()
+        }
+        this.playerNodeList = []
+        players.map(c => {
+          this.addPlayerNode(c)
+        })
+    })
   },
   // 通知谁是地主, 并显示底牌
   masterNotify({ masterId, cards }) {
@@ -422,11 +428,14 @@ cc.Class({
   // },
   // 添加玩家节点
   addPlayerNode(player_data) {
-    const {id, next_id, table_id} = player_data
+    const {id, next_id, table_id, ready} = player_data
     if (table_id !== myglobal.playerData.tableId) return
 
     var index = id === myglobal.playerData.userId ? 0 : next_id === myglobal.playerData.userId ? 2 : 1
     player_data.seat_index = index
+    if (index === 0) {
+      this.btn_ready.active = !ready // 准备按钮
+    }
     var playernode_inst = cc.instantiate(this.player_node_prefabs)
     playernode_inst.parent = this.players_seat_pos.children[index]
     //创建的节点存储在gamescene的列表中
