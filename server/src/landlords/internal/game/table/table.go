@@ -8,6 +8,15 @@ import (
 	"time"
 )
 
+const (
+	GameWaitting       = iota // 准备
+	GamePushCard              // 发牌
+	GameCallScore             // 叫分
+	GameShowBottomCard        // 显示底牌
+	GamePlaying               // 出牌
+	GameEnd                   // 结束
+)
+
 type Table struct {
 	TableID    int64            `json:"table_id"`
 	CreateTime string           `json:"create_time"`
@@ -45,11 +54,13 @@ func (t *Table) setPlayerNext() {
 		logs.Error("setPlayerNext")
 	}()
 	pCount := len(t.Players)
-	// 重置顺序
-	for i := 0; i < pCount; i++ {
-		player := t.Players[i]
-		player.Next = t.Players[(i+1)%pCount]
-		player.NextID = t.Players[(i+1)%pCount].ID
+	if pCount > 1 {
+		// 重置顺序
+		for i := 0; i < pCount; i++ {
+			player := t.Players[i]
+			player.Next = t.Players[(i+1)%pCount]
+			player.NextID = t.Players[(i+1)%pCount].ID
+		}
 	}
 
 	//	重置房主

@@ -198,8 +198,15 @@ func (c *Player) wsRequest(r *Request) {
 	}()
 	switch r.Action {
 	case PlayerReady:
-		data := map[int]int{c.ID: 1}
 		c.Ready = 1
+		data := map[int]int{c.ID: c.Ready}
+
+		if c.Next != nil {
+			data[c.Next.ID] = c.Next.Ready
+			if c.Next.Next != nil {
+				data[c.Next.Next.ID] = c.Next.Next.Ready
+			}
+		}
 		c.AllSendMsg(PlayerReady, data)
 	}
 }

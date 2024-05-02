@@ -13,7 +13,7 @@ import (
 
 var (
 	upGrader = websocket.Upgrader{
-		ReadBufferSize:  1024,
+		ReadBufferSize:  4096,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			if r.Method != "GET" {
@@ -57,8 +57,15 @@ func StartServeWs(w http.ResponseWriter, r *http.Request) (err error) {
 		log.Panicf("upgrade err:%v\n", err)
 		return err
 	}
-
+	if user.Conn != nil {
+		err = user.CloseWS()
+		if err != nil {
+			log.Panicf("upgrade err:%v\n", err)
+			return err
+		}
+	}
 	user.Conn = conn
 	go user.ReadPump()
+
 	return nil
 }
