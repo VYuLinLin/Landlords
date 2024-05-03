@@ -42,7 +42,6 @@ func init() {
 	fmt.Println("连接数据库成功")
 
 	CreateTableUsers()
-	CreateTableRooms()
 }
 
 func errorHandler(err error) {

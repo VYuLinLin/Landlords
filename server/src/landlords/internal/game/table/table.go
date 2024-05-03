@@ -3,8 +3,11 @@ package table
 import (
 	"errors"
 	"github.com/astaxie/beego/logs"
+	"landlords/internal/common"
 	"landlords/internal/db"
+	"landlords/internal/game/logic/pokerlogic"
 	"landlords/internal/game/player"
+	"landlords/internal/game/poker"
 	"time"
 )
 
@@ -23,9 +26,19 @@ type Table struct {
 	Status     int              `json:"status"`
 	Creator    *player.Player   `json:"creator"`
 	Players    []*player.Player `json:"players"`
-	//Player1    *player.Player `json:"player_1"`
-	//Player2    *player.Player `json:"player_2"`
-	//Player3    *player.Player `json:"player_3"`
+	pokers     *pokerlogic.Card `json:"-"`
+}
+
+func JoinNewTable(u *db.User) (t *Table, err error) {
+	now := time.Now()
+	creator := &player.Player{User: u}
+	return &Table{
+		TableID:    now.Unix(),
+		CreateTime: now.Format("2006-01-02 15:04:05"),
+		Creator:    creator,
+		Players:    []*player.Player{creator},
+		Status:     GameWaitting,
+	}, err
 }
 
 // AllSendMsg 推送给座位上的所有玩家(与*player.AllSendMsg方法功能相同)
@@ -108,18 +121,25 @@ func (t *Table) LeaveTable(u *db.User) (err error) {
 			"user_id":    u.ID,
 			"creator_id": t.Creator.ID,
 		}
-		t.AllSendMsg(player.RoomLeave, data)
+		t.AllSendMsg(common.RoomLeave, data)
 	}
 	return err
 }
 
-func JoinNewTable(u *db.User) (t *Table, err error) {
-	now := time.Now()
-	creator := &player.Player{User: u}
-	return &Table{
-		TableID:    now.Unix(),
-		CreateTime: now.Format("2006-01-02 15:04:05"),
-		Creator:    creator,
-		Players:    []*player.Player{creator},
-	}, err
+// StartGame 所有玩家准备完成，开始游戏
+// 发牌 =》 叫地主 =》抢地主 =》 出牌 =》 结束
+func (t *Table) StartGame() (err error) {
+	pokers := &pokerlogic.Card{}
+	pokers.GetNewPokers()
+	t.pokers = pokers
+	t.Status = GamePushCard
+	// 推送
+	for i := 0; i < len(t.Players); i++ {
+		p := t.Players[i]
+		data := map[string]poker.Pokers{
+			"pokers": pokers.Cards[i],
+		}
+		p.SendMsg(common.PlayerDeal, 200, data)
+	}
+	return err
 }

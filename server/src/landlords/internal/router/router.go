@@ -5,9 +5,9 @@ import (
 	"flag"
 	"fmt"
 	"github.com/astaxie/beego/logs"
-	"github.com/googollee/go-socket.io"
 	"landlords/internal/api"
 	"landlords/internal/conf"
+	"landlords/internal/ws"
 	"log"
 	"net/http"
 )
@@ -67,10 +67,6 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		err2 = roomApi.ExitRoom(response)
 	case "/getTable":
 		res, err2 = roomApi.GetTable(response)
-	case "/ws/":
-		err2 = api.StartServeWs(w, r)
-		logs.Error("/ws", err2)
-		return
 	}
 
 	if err2 != nil {
@@ -90,92 +86,16 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Write(strParams)
 }
 func init() {
-	server, err := socketio.NewServer(nil)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	server.OnConnect("/", func(s socketio.Conn) error {
-		s.SetContext("connect server success.")
-		fmt.Println("connected:", s.ID())
-		return nil
-	})
-
-	server.OnEvent("/", "notify", func(s socketio.Conn, msg responseMsg) {
-		//var (
-		//	status   = 1
-		//	msgIndex = msg["msgIndex"]
-		//	msgType  = msg["msgType"]
-		//	data     = make(Msgs)
-		//)
-		//
-		//fmt.Println("notify:", msg)
-		//log.Println(
-		//	"notify:",
-		//	msg,
-		//)
-		//if len(msgType.(string)) == 0 {
-		//	fmt.Println(msgType)
-		//	status = 0
-		//	data["data"] = "请求错误"
-		//} else {
-		//	var p = msg["data"]
-		//	var err error
-		//	switch msgType {
-		//	case "register":
-		//		data["data"], err = api.Register(p)
-		//	case "login":
-		//		data["data"], err = api.LoginHandler(p)
-		//	case "JoinRoom":
-		//		data["data"], err = api.JoinRoom(p)
-		//	case "startgame":
-		//		data["data"], err = api.JoinRoom(p)
-		//	}
-		//	if err != nil {
-		//		status = 0
-		//		data["data"] = err.Error()
-		//	}
-		//}
-		//data["status"] = status
-		//data["msgType"] = msgType
-		//data["msgIndex"] = msgIndex
-		//
-		//fmt.Println("emit notify: ", data)
-		//s.Emit("notify", data)
-	})
-
-	// server.OnEvent("/chat", "msg", func(s router.Conn, msg string) string {
-	// 	s.SetContext(msg)
-	// 	return "recv " + msg
-	// })
-
-	// server.OnEvent("/", "bye", func(s router.Conn) string {
-	// 	last := s.Context().(string)
-	// 	s.Emit("bye", last)
-	// 	s.Close()
-	// 	return last
-	// })
-
-	server.OnError("/", func(s socketio.Conn, e error) {
-		fmt.Println("meet error:", e)
-	})
-
-	server.OnDisconnect("/", func(s socketio.Conn, reason string) {
-		fmt.Println("closed: ", reason)
-	})
-
-	go server.Serve()
-	defer server.Close()
-
 	http.HandleFunc("/login", logPanics(handler))
 	http.HandleFunc("/register", logPanics(handler))
 	http.HandleFunc("/logout", logPanics(handler))
 	http.HandleFunc("/joinRoom", logPanics(handler))
 	http.HandleFunc("/exitRoom", logPanics(handler))
 	http.HandleFunc("/getTable", logPanics(handler))
-	http.HandleFunc("/ws/", logPanics(handler))
 
-	//http.Handle("/socket.io/", corsMiddleware(server))
+	w := ws.NewWsServer()
+	http.HandleFunc("/ws", logPanics(w.ServeHTTP))
+
 	//http.Handle("/", http.FileServer(http.Dir("./asset")))
 	// 设置静态目录
 	static := http.FileServer(http.Dir("./static"))
@@ -186,21 +106,7 @@ func init() {
 	log.Printf("Serving at localhost:%s...\n", *addr)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }
-func corsMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		allowHeaders := "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization"
 
-		w.Header().Set("Content-Type", "application/json")
-		//w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "POST, PUT, PATCH, GET, DELETE")
-		w.Header().Set("Access-Control-Allow-Credentials", "true")
-		w.Header().Set("Access-Control-Allow-Headers", allowHeaders)
-
-		// it can fix 403
-		r.Header.Del("Origin")
-		next.ServeHTTP(w, r)
-	})
-}
 func logPanics(f HandleFunc) HandleFunc {
 	return func(w http.ResponseWriter, req *http.Request) {
 		defer func() {

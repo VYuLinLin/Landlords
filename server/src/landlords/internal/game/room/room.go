@@ -3,6 +3,7 @@ package room
 import (
 	"errors"
 	"fmt"
+	"landlords/internal/common"
 	"landlords/internal/db"
 	"landlords/internal/game/player"
 	"landlords/internal/game/table"
@@ -100,7 +101,7 @@ func JoinRoom(u *db.User, level string) (room *Info, err error) {
 					"next_id":  p.NextID,
 					"table_id": tableId,
 				}
-				room.Table.AllSendMsg(player.RoomJoin, data)
+				room.Table.AllSendMsg(common.RoomJoin, data)
 			}
 		} else {
 			err = room.Table.LeaveTable(u)
@@ -132,8 +133,7 @@ func GetTableData(id int64) (room *Info, err error) {
 	room = &Info{}
 	r := *Rooms
 Exit:
-	for s, val := range r {
-		fmt.Println(s, val)
+	for _, val := range r {
 		for i, l := 0, len(val.Tables); i < l; i++ {
 			t := val.Tables[i]
 			if t.TableID == id {
@@ -155,8 +155,7 @@ Exit:
 // GetPlayerData 根据用户id查找当前游戏中的用户
 func GetPlayerData(id int) *player.Player {
 	r := *Rooms
-	for s, val := range r {
-		fmt.Println(s, val)
+	for _, val := range r {
 		for i, l := 0, len(val.Tables); i < l; i++ {
 			t := val.Tables[i]
 			u := t.IsAtTable(id)

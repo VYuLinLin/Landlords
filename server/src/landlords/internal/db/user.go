@@ -8,6 +8,21 @@ import (
 	"time"
 )
 
+const createTableUsers = `CREATE TABLE IF NOT EXISTS users(
+	id INT(10) AUTO_INCREMENT NOT NULL,
+	name VARCHAR(64) NOT NULL,
+	password VARCHAR(64),
+	coin INT(64) DEFAULT 0,
+	score INT(5) DEFAULT 0,
+	status INT(4) DEFAULT 0,
+	create_time VARCHAR(64) NOT NULL,
+    room_id INT DEFAULT 0,
+    table_id INT(64) DEFAULT 0,
+	PRIMARY KEY (id, name, create_time)
+); `
+
+var insertUserSql = `INSERT INTO users(coin,name,password,create_time) VALUES(?,?,?,?);`
+
 type User struct {
 	ID         int    `json:"id"`
 	NAME       string `json:"name"`
@@ -20,7 +35,17 @@ type User struct {
 	TABLEID    int64  `json:"table_id"`
 }
 
-var insertUserSql = `INSERT INTO users(coin,name,password,create_time) VALUES(?,?,?,?);`
+// CreateTableUsers 创建用户表
+func CreateTableUsers() {
+	_, err := db.Exec(createTableUsers)
+	if err == nil {
+		fmt.Println("create table users successd")
+	} else {
+		// 关闭数据库
+		defer db.Close()
+		errorHandler(err)
+	}
+}
 
 // InsertUser 新增用户
 func InsertUser(name, password string) {
@@ -58,7 +83,7 @@ func QueryUser(p *User) (user *User, err error) {
 	user = new(User) // 用new()函数初始化一个结构体对象
 	// row.scan中的字段必须是按照数据库存入字段的顺序，否则报错
 	err = row.Scan(&user.ID, &user.NAME, &user.PASSWORD, &user.COIN, &user.SCORE, &user.STATUS, &user.CREATETIME, &user.ROOMID, &user.TABLEID)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		err = errors.New("未查询到此用户")
 	}
 	return user, err
@@ -77,7 +102,7 @@ func QueryUserId(p *User) (user *User, err error) {
 	user = new(User) // 用new()函数初始化一个结构体对象
 	// row.scan中的字段必须是按照数据库存入字段的顺序，否则报错
 	err = row.Scan(&user.ID, &user.NAME, &user.PASSWORD, &user.COIN, &user.SCORE, &user.STATUS, &user.CREATETIME, &user.ROOMID, &user.TABLEID)
-	if err == sql.ErrNoRows {
+	if errors.Is(err, sql.ErrNoRows) {
 		err = errors.New("未查询到此用户")
 	}
 	return user, err

@@ -3,11 +3,9 @@ package api
 import (
 	"errors"
 	"fmt"
-	"landlords/internal/common"
 	"landlords/internal/db"
 	"landlords/internal/game/room"
-	"math/rand"
-	"time"
+	"strconv"
 )
 
 type LoginApi struct{}
@@ -55,7 +53,7 @@ func (l *LoginApi) LoginHandler(p interface{}) (d *db.User, err error) {
 		return nil, errors.New("密码错误")
 	}
 	if user.TABLEID > 0 && user.ROOMID > 0 {
-		_, err = room.JoinRoom(user, string(user.ROOMID))
+		_, err = room.JoinRoom(user, strconv.Itoa(user.ROOMID))
 	}
 	return user, err
 }
@@ -70,7 +68,6 @@ func (l *LoginApi) LogoutHandler(p interface{}) (d *db.User, err error) {
 		ID:   int(m["id"].(float64)),
 		NAME: m["name"].(string),
 	}
-	fmt.Println("LogoutHandler:", *User)
 	var user *db.User
 	user, err = db.QueryUser(User)
 	fmt.Println(*user)
@@ -78,12 +75,4 @@ func (l *LoginApi) LogoutHandler(p interface{}) (d *db.User, err error) {
 		err = fmt.Errorf("用户ID错误")
 	}
 	return user, err
-}
-
-// NewUser 生成一个新玩家
-func NewUser(userName string) *common.User {
-	time.Sleep(10) // 添加睡眠，避免同步调用时生成相同的id
-	rand.Seed(time.Now().UnixNano())
-	var id = rand.Intn(100000)
-	return &common.User{id, userName, 1}
 }

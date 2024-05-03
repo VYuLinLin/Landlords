@@ -10,9 +10,16 @@ const (
 	heart              // 红桃♥
 	club               // 梅花♣
 	diamond            // 方片♦
-	// King 大小王
-	King
+	King               // 大小王
 )
+
+// CardShape 扑克牌类型
+var CardShape = map[cardShapeType]cardShapeFlag{
+	"S": spade,   // 黑桃♠
+	"H": heart,   // 红桃♥
+	"C": club,    // 梅花♣
+	"D": diamond, // 方片♦
+}
 
 // Cards 扑克牌
 var Cards = map[cardType]cardValue{
@@ -31,24 +38,16 @@ var Cards = map[cardType]cardValue{
 	"K":  11,
 }
 
-// CardShape 扑克牌类型
-var CardShape = map[cardShapeType]cardShapeFlag{
-	"S": spade,
-	"H": heart,
-	"C": club,
-	"D": diamond,
-}
-
 // Kings 大小王
 var Kings = map[cardType]cardValue{
-	"kx": 14,
-	"kd": 15,
+	"kx": 15, // 大王
+	"kd": 14, // 小王
 }
 
 // Poker information
 type Poker struct {
-	Shape cardShapeFlag
-	Value cardValue
+	Shape cardShapeFlag `json:"shape"`
+	Value cardValue     `json:"value"`
 }
 
 // Pokers information
