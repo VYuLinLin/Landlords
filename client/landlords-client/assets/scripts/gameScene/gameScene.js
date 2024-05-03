@@ -2,7 +2,7 @@
  * @Author: v vvv@888.com
  * @Date: 2022-05-09 13:33:49
  * @LastEditors: v vvv@888.com
- * @LastEditTime: 2024-05-02 23:28:24
+ * @LastEditTime: 2024-05-03 21:53:35
  * @FilePath: \landlords-client\assets\scripts\gameScene\gameScene.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -308,10 +308,11 @@ cc.Class({
         // ddzData.gameState = ddzConsts.gameStatus.GAMESTART
         break
       case cc.wsApi.playerDeal:
-        window.$socket.emit('pushcard_notify', e.data)
         for (let i = 0; i < this.playerNodeList.length; i++) {
           const node = this.playerNodeList[i]
-          if (node.seat_index !== 0) {
+          if (node.seat_index === 0) {
+            window.$socket.emit('pushcard_notify', e.data)
+          } else {
             //给playernode节点发送事件
             node.emit("push_card_event")
           }

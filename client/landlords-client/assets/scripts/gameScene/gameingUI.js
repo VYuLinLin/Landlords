@@ -196,6 +196,7 @@ cc.Class({
     }
   },
   pushCardNotify(data) {
+    const {pokers, hole_pokers} = data
     let [W, w, two, one, other] = [[], [], [], [], []]
     for (let i = 0; i < data.length; i++) {
       const c = data[i]
@@ -213,7 +214,7 @@ cc.Class({
     }
     other.sort((a, b) => a%13 - b%13)
     data = [...W, ...w, ...two, ...one, ...other]
-    this.card_data = data
+    // this.card_data = data
     this.cur_index_card = data.length - 1
     this.pushCard(data)
     //左边移动定时器

@@ -36,7 +36,7 @@ export class WS extends EventEmitter {
      * @param {string} url
      * @memberof WS
      */
-    connect(url = 'ws://localhost/ws/') {
+    connect(url = 'ws://localhost/ws') {
         if (!this._sock || [WebSocket.CLOSING, WebSocket.CLOSED].includes(this._sock.readyState)) {
             
             url += `?id=${myglobal.playerData.userId}`
