@@ -9,6 +9,7 @@ import (
 )
 
 type GameConfInfo struct {
+	Version  string
 	HttpPort int
 	LogPath  string
 	LogLevel string
@@ -30,8 +31,13 @@ func InitConf() (err error) {
 		logs.Error("new conf failed ,err : %v", err)
 		return
 	}
-
 	environment += "::"
+
+	GameConf.Version = conf.String(environment + "version")
+	if len(GameConf.Version) == 0 {
+		GameConf.Version = "1.0.0"
+	}
+
 	GameConf.HttpPort, err = conf.Int(environment + "http_port")
 	if err != nil {
 		logs.Error("config http_port failed,err: %v", err)

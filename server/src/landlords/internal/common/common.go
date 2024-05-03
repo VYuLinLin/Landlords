@@ -5,8 +5,8 @@ import (
 	"strconv"
 )
 
-// TransToString 未知类型转换成字符串
-func TransToString(data interface{}) (res string) {
+// ToString 未知类型转换成字符串
+func ToString(data interface{}) (res string) {
 	switch v := data.(type) {
 	case float64:
 		res = strconv.FormatFloat(data.(float64), 'f', 6, 64)

@@ -25,9 +25,6 @@ const (
 	pingPeriod     = (pongWait * 9) / 10
 	maxMessageSize = 512
 
-	RoleFarmer   = 0
-	RoleLandlord = 1
-
 	ReqHeart = "1"
 	ResHeart = "2"
 )
@@ -43,7 +40,7 @@ type Response struct {
 	Data   interface{} `json:"data"`
 }
 
-// 创建WsServer结构体
+// WsServer 创建WsServer结构体
 type WsServer struct {
 	addr    string
 	upgrade *websocket.Upgrader
@@ -51,6 +48,7 @@ type WsServer struct {
 
 // 初始化WsServer
 func NewWsServer() *WsServer {
+	log.Println("ws init start")
 	ws := new(WsServer)
 	ws.addr = ":8089"
 	ws.upgrade = &websocket.Upgrader{
@@ -88,7 +86,7 @@ func (self *WsServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	user := room.GetPlayerData(userId)
 	if user == nil {
-		logs.Debug("未在座位中", err)
+		logs.Debug("未在座位中【%v】", userId, err)
 		err = db.UpdateUserRoomIdAndTableId(0, 0, &db.User{
 			ID: userId,
 		})
@@ -162,7 +160,6 @@ func (self *WsServer) connHandle(conn *websocket.Conn, user *player.Player) {
 
 // 向客户端发送消息
 func (self *WsServer) send(conn *websocket.Conn, stopCh chan any) {
-	//self.send10(conn)
 	for {
 		select {
 		case data := <-stopCh:
@@ -177,10 +174,6 @@ func (self *WsServer) send(conn *websocket.Conn, stopCh chan any) {
 				fmt.Println("send message failed ", err)
 				return
 			}
-			if string(msgByte) == ResHeart {
-				continue
-			}
-			fmt.Println("connection closed")
 			//case <-time.After(time.Second * 1):
 			//	data := fmt.Sprintf("Hello WebSocket test from server %v", time.Now().UnixNano())
 			//	err := conn.WriteMessage(1, []byte(data))
@@ -192,19 +185,15 @@ func (self *WsServer) send(conn *websocket.Conn, stopCh chan any) {
 	}
 }
 
-// 启动WebSocket服务器
-func (w *WsServer) Start() (err error) {
-	http.HandleFunc("/ws", w.ServeHTTP)
-	err = http.ListenAndServe(w.addr, nil)
+// Start 启动WebSocket服务器
+/*示例：
+ws := NewWsServer()
+err := ws.Start()
+if err != nil {
+	logs.Error("ws init error: ", err)
+}*/
+func (self *WsServer) Start() (err error) {
+	http.HandleFunc("/ws", self.ServeHTTP)
+	err = http.ListenAndServe(self.addr, nil)
 	return nil
-}
-
-func init() {
-	log.Println("ws init start")
-	// 示例：
-	//ws := NewWsServer()
-	//err := ws.Start()
-	//if err != nil {
-	//	logs.Error("ws init error: ", err)
-	//}
 }
