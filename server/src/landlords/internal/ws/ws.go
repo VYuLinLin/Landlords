@@ -8,6 +8,7 @@ import (
 	"github.com/astaxie/beego/logs"
 	"github.com/gorilla/websocket"
 	"landlords/internal/api/ws"
+	"landlords/internal/common"
 	"landlords/internal/db"
 	"landlords/internal/game/player"
 	"landlords/internal/game/room"
@@ -93,6 +94,9 @@ func (self *WsServer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			logs.Debug("退出失败", err)
 		}
+		data := &common.ResponseMsg{Code: 1, Msg: "该玩家未在座位中"}
+		strParams, _ := json.Marshal(data)
+		w.Write(strParams)
 		return
 	}
 

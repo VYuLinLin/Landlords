@@ -2,31 +2,35 @@ package table
 
 import (
 	"errors"
+	"fmt"
 	"github.com/astaxie/beego/logs"
 	"landlords/internal/common"
 	"landlords/internal/db"
 	"landlords/internal/game/logic/pokerlogic"
 	"landlords/internal/game/player"
 	"landlords/internal/game/poker"
+	"math/rand"
 	"time"
 )
 
 const (
 	GameWaitting       = iota // 准备
 	GamePushCard              // 发牌
-	GameCallScore             // 叫分
+	GameCalling               // 叫地主
+	GameSnatch                // 抢地主
 	GameShowBottomCard        // 显示底牌
 	GamePlaying               // 出牌
 	GameEnd                   // 结束
 )
 
 type Table struct {
-	TableID    int64            `json:"table_id"`
-	CreateTime string           `json:"create_time"`
-	Status     int              `json:"status"`
-	Creator    *player.Player   `json:"creator"`
-	Players    []*player.Player `json:"players"`
-	pokers     *pokerlogic.Card `json:"-"`
+	TableID     int64            `json:"table_id"`
+	CreateTime  string           `json:"create_time"`
+	Status      int              `json:"status"`
+	Creator     *player.Player   `json:"creator"`
+	Players     []*player.Player `json:"players"`
+	holePokers  poker.Pokers     `json:"-"`
+	activeIndex int              `json:"-"`
 }
 
 func JoinNewTable(u *db.User) (t *Table, err error) {
@@ -129,17 +133,138 @@ func (t *Table) LeaveTable(u *db.User) (err error) {
 // StartGame 所有玩家准备完成，开始游戏
 // 发牌 =》 叫地主 =》抢地主 =》 出牌 =》 结束
 func (t *Table) StartGame() (err error) {
+	defer func() {
+		if err := recover(); err != nil {
+			fmt.Println("StartGame panic:", err)
+		}
+	}()
+
+	t.Status = 0
+	t.NextStatus()
+
+	return err
+}
+
+// NextStatus 更新桌子状态到下一步
+func (t *Table) NextStatus(arg ...int) (ok bool) {
+	len := len(arg)
+	if len > 0 {
+		status := arg[0]
+		if t.Status > status {
+			return ok
+		}
+		t.Status = status
+	} else {
+		t.Status += 1
+	}
+
+	switch t.Status {
+	case GamePushCard:
+		// 发牌
+		t.gamePushCard()
+	case GameCalling:
+		// 叫地主
+		t.activeIndex = rand.Intn(3)
+		go t.gameCalling(t.activeIndex, 1)
+	case GameSnatch:
+		// 抢地主
+		go t.gameSnatch(t.activeIndex, 1)
+	}
+
+	ok = true
+	return ok
+}
+
+// 发牌
+func (t *Table) gamePushCard() (err error) {
+	if t.Status > GamePushCard {
+		return err
+	}
 	pokers := &pokerlogic.Card{}
 	pokers.GetNewPokers()
-	t.pokers = pokers
-	t.Status = GamePushCard
-	// 推送
+	t.holePokers = pokers.HoleCards
 	for i := 0; i < len(t.Players); i++ {
 		p := t.Players[i]
-		data := map[string]poker.Pokers{
-			"pokers": pokers.Cards[i],
-		}
-		p.SendMsg(common.PlayerDeal, 200, data)
+		cards := pokers.Cards[i]
+		data := map[string]poker.Pokers{"pokers": cards}
+		err = p.SendMsg(common.PlayerDeal, 200, data)
+		logs.Error("[%v]PlayerDeal Error:", p.ID, err)
+		err = p.SetCards(cards)
+		logs.Error("[%v]SetCards Error:", p.ID, err)
 	}
+	t.NextStatus()
+	return err
+}
+
+// 叫地主
+func (t *Table) gameCalling(index, count int) (err error) {
+	if t.Status > GameCalling {
+		return err
+	}
+	if count > 3 {
+		t.NextStatus(GameSnatch)
+		return err
+	}
+
+	callPlayer := t.Players[index]
+	data := map[string]int{"id": callPlayer.ID}
+	for i := 0; i < len(t.Players); i++ {
+		p := t.Players[i]
+		err = p.SendMsg(common.TableCalling, 200, data)
+		logs.Error("[%v]TableCalling Error:", p.ID, err)
+	}
+
+	time.Sleep(10 * time.Second)
+
+	nextActive := (index + 1) % 3
+	addCount := count + 1
+	if t.Players[nextActive].GameStatus < 2 {
+		t.Players[index].GameStatus = 3 // 不叫
+		go t.gameCalling(nextActive, addCount)
+	}
+	return err
+}
+
+// 抢地主
+func (t *Table) gameSnatch(index, count int) (err error) {
+	if t.Status > GameSnatch {
+		return err
+	}
+	if count > 3 {
+		t.NextStatus(GameShowBottomCard)
+		return err
+	}
+
+	callPlayer := t.Players[index]
+	data := map[string]int{"id": callPlayer.ID}
+	for i := 0; i < len(t.Players); i++ {
+		p := t.Players[i]
+		err = p.SendMsg(common.TableSnatch, 200, data)
+		logs.Error("[%v]TableSnatch Error:", p.ID, err)
+	}
+
+	time.Sleep(10 * time.Second)
+
+	nextActive := (index + 1) % 3
+	addCount := count + 1
+	if t.Players[nextActive].GameStatus < 4 {
+		t.Players[index].GameStatus = 5 // 不抢
+		go t.gameSnatch(nextActive, addCount)
+	}
+	return err
+}
+
+// 显示底牌
+func (t *Table) gameShowBottomCard(index, count int) (err error) {
+	if t.Status > GameShowBottomCard {
+		return err
+	}
+	data := map[string]poker.Pokers{"pokers": t.holePokers}
+	for i := 0; i < len(t.Players); i++ {
+		p := t.Players[i]
+		err = p.SendMsg(common.TableShowHolePokers, 200, data)
+		logs.Error("[%v]PlayerSnatch Error:", p.ID, err)
+	}
+
 	return err
 }
