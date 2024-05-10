@@ -6,18 +6,13 @@ import (
 	"fmt"
 	"github.com/astaxie/beego/logs"
 	"landlords/internal/api"
+	"landlords/internal/common"
 	"landlords/internal/conf"
 	"landlords/internal/ws"
 	"log"
 	"net/http"
 )
 
-// responseMsg 接口出参统一格式
-type responseMsg struct {
-	Code int    `json:"code"`
-	Msg  string `json:"msg"`
-	Data any    `json:"data"`
-}
 type NullStruct struct{}
 type RequestMsg = map[string]interface{}
 type HandleFunc func(http.ResponseWriter, *http.Request)
@@ -40,8 +35,7 @@ func parseResponse(r *http.Request) (res interface{}, err error) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	data := &responseMsg{0, "success", NullStruct{}}
-	fmt.Println("URL", r.URL)
+	data := &common.ResponseMsg{Msg: "success", Data: NullStruct{}}
 
 	response, err1 := parseResponse(r)
 	if err1 != nil {
@@ -103,7 +97,7 @@ func init() {
 
 	addr := flag.String("addr", fmt.Sprintf(":%d", conf.GameConf.HttpPort), "http service address")
 
-	log.Printf("Serving at localhost:%s...\n", *addr)
+	log.Printf("Serving at localhost:%s \n", *addr)
 	log.Fatal(http.ListenAndServe(*addr, nil))
 }
 

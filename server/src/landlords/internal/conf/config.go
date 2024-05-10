@@ -1,7 +1,6 @@
 package conf
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/astaxie/beego/config"
@@ -25,7 +24,6 @@ func InitConf() (err error) {
 		environment = "product"
 	}
 	logs.Info("the running environment is : %s", environment)
-	fmt.Println(os.Getwd())
 	conf, err := config.NewConfig("ini", "internal/conf/app.conf")
 	if err != nil {
 		logs.Error("new conf failed ,err : %v", err)
@@ -37,6 +35,7 @@ func InitConf() (err error) {
 	if len(GameConf.Version) == 0 {
 		GameConf.Version = "1.0.0"
 	}
+	logs.Debug("read conf success , Version : %v", GameConf.Version)
 
 	GameConf.HttpPort, err = conf.Int(environment + "http_port")
 	if err != nil {
@@ -44,7 +43,7 @@ func InitConf() (err error) {
 		return
 	}
 
-	logs.Debug("read conf success , http port : %v", GameConf.HttpPort)
+	logs.Debug("read conf success , httpPort : %v", GameConf.HttpPort)
 
 	//todo log config
 	GameConf.LogPath = conf.String(environment + "log_path")

@@ -62,10 +62,25 @@ func (r *RoomApi) ExitRoom(p interface{}) (err error) {
 // GetTable 根据桌子id获取桌子信息
 func (r *RoomApi) GetTable(p interface{}) (d *room.Info, err error) {
 	m := p.(map[string]interface{})
-	if m["tableId"] == nil || m["tableId"] == "" {
-		return nil, errors.New("tableId不能为空")
+	if m["userId"] == nil || m["userId"] == "" {
+		return d, errors.New("userId不能为空")
 	}
-	id := m["tableId"].(float64)
-	d, err = room.GetTableData(int64(id))
-	return d, err
+	if m["tableId"] == nil || m["tableId"] == "" {
+		return d, errors.New("tableId不能为空")
+	}
+
+	userID := m["userId"].(float64)
+	tableId := m["tableId"].(float64)
+	roomInfo, err := room.GetDeepTableData(int64(tableId))
+	if err != nil {
+		return d, err
+	}
+	// 玩家只能看到自己的手牌
+	players := roomInfo.Table.Players
+	for i := 0; i < len(players); i++ {
+		if players[i].ID != int(userID) {
+			players[i].Cards = nil
+		}
+	}
+	return roomInfo, err
 }

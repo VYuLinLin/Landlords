@@ -12,12 +12,14 @@ import (
 // Player 游戏中的玩家信息
 type Player struct {
 	*db.User
-	Conn   *websocket.Conn `json:"-"`
-	Ready  int             `json:"ready"`
-	Cards  []p.Poker       `json:"cards"`
-	Next   *Player         `json:"-"`
-	NextID int             `json:"next_id"`
-	Mux    sync.RWMutex    `json:"-"`
+	GameStatus int             `json:"game_status"` // 默认0-未准备 1-已准备 2叫地主 3-不叫 4-抢地主 5-不抢 6-出牌 7-不出牌 8-输 9-赢
+	Ready      int             `json:"ready"`
+	CardCount  int             `json:"card_count"`
+	Cards      []p.Poker       `json:"cards"`
+	NextID     int             `json:"next_id"`
+	Next       *Player         `json:"-"`
+	Conn       *websocket.Conn `json:"-"`
+	Mux        sync.RWMutex    `json:"-"`
 }
 
 // Players information
@@ -93,5 +95,12 @@ func (c *Player) CloseWS() (err error) {
 		err = c.Conn.Close()
 		c.Conn = nil
 	}
+	return err
+}
+
+// SetCards 设置玩家手牌
+func (c *Player) SetCards(cards p.Pokers) (err error) {
+	c.Cards = cards
+	c.CardCount = len(cards)
 	return err
 }

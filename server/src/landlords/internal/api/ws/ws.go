@@ -40,7 +40,7 @@ func WSRequest(r *Request, c *player.Player) {
 			}
 			r, err := room.GetTableData(c.TABLEID)
 			if err == nil {
-				r.Table.StartGame()
+				go r.Table.StartGame()
 			}
 		}
 	}

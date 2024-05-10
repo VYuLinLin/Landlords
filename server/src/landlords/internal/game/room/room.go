@@ -152,6 +152,53 @@ Exit:
 	return room, err
 }
 
+// GetDeepTableData 根据桌子id获取桌面信息,深拷贝数据
+func GetDeepTableData(id int64) (room *Info, err error) {
+	room = &Info{}
+	r := *Rooms
+Exit:
+	for _, val := range r {
+		for i, l := 0, len(val.Tables); i < l; i++ {
+			t := val.Tables[i]
+			if t.TableID == id {
+				room.RoomName = val.RoomName
+				room.RoomLevel = val.RoomLevel
+				// 手动深拷贝，避免数据污染
+				room.Table = &table.Table{
+					TableID: t.TableID,
+					Status:  t.Status,
+				}
+				if t.Creator != nil {
+					room.Table.Creator = &player.Player{
+						User:      t.Creator.User,
+						Ready:     t.Creator.Ready,
+						NextID:    t.Creator.NextID,
+						CardCount: t.Creator.CardCount,
+					}
+				}
+				for i := 0; i < len(t.Players); i++ {
+					p := t.Players[i]
+					room.Table.Players = append(room.Table.Players, &player.Player{
+						User:      p.User,
+						Conn:      p.Conn,
+						Ready:     p.Ready,
+						NextID:    p.NextID,
+						Cards:     p.Cards[:],
+						CardCount: p.CardCount,
+					})
+				}
+				break Exit
+			}
+		}
+	}
+	// 匹配桌子id
+
+	if room.Table == nil {
+		err = errors.New("桌子id匹配为空")
+	}
+	return room, err
+}
+
 // GetPlayerData 根据用户id查找当前游戏中的用户
 func GetPlayerData(id int) *player.Player {
 	r := *Rooms

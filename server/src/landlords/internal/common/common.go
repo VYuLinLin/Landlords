@@ -33,3 +33,11 @@ func ToString(data interface{}) (res string) {
 	}
 	return
 }
+
+// DeepCopy 一个通用的深拷贝函数
+// dst 目标结构体，src 源结构体
+// 必须传入指针，且不能为nil
+// 它会把src与dst的相同字段名的值，复制到dst中
+func DeepCopy(src, dst interface{}) {
+
+}

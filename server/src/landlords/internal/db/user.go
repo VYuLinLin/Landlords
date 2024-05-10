@@ -39,7 +39,7 @@ type User struct {
 func CreateTableUsers() {
 	_, err := db.Exec(createTableUsers)
 	if err == nil {
-		fmt.Println("create table users successd")
+		fmt.Println("create table users success")
 	} else {
 		// 关闭数据库
 		defer db.Close()

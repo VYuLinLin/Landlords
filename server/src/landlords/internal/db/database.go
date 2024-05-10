@@ -39,8 +39,9 @@ func init() {
 	err = db.Ping()
 	errorHandler(err)
 
-	fmt.Println("连接数据库成功")
+	fmt.Println("Connecting to the database succeeded")
 
+	// 创建用户表
 	CreateTableUsers()
 }
 
