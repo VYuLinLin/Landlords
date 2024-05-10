@@ -1,4 +1,5 @@
-const httpUrl = 'http://localhost'
+// const httpUrl = 'http://localhost'
+const httpUrl = 'http://192.168.2.13'
 /**
  * Http 请求封装
  */

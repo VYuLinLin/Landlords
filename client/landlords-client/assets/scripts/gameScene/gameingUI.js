@@ -149,7 +149,7 @@ cc.Class({
   start() {
     // 监听游戏状态
     if (!CC_EDITOR) {
-      ddzData.gameStateNotify.addListener(this.gameStateHandler, this)
+      // ddzData.gameStateNotify.addListener(this.gameStateHandler, this)
     }
     window.$socket.on('_chooseCard', this._chooseCardNotify, this) // 选牌
     window.$socket.on('_unchooseCard', this._unchooseCardNotify, this) // 取消选牌
@@ -161,7 +161,7 @@ cc.Class({
   },
   onDestroy() {
     if (!CC_EDITOR) {
-      ddzData.gameStateNotify.removeListener(this.gameStateHandler, this)
+      // ddzData.gameStateNotify.removeListener(this.gameStateHandler, this)
     }
     window.$socket.remove('_chooseCard', this)
     window.$socket.remove('_unchooseCard', this)
@@ -196,24 +196,7 @@ cc.Class({
     }
   },
   pushCardNotify(data) {
-    const {pokers, hole_pokers} = data
-    let [W, w, two, one, other] = [[], [], [], [], []]
-    for (let i = 0; i < data.length; i++) {
-      const c = data[i]
-      if (c === 52) {
-        W.push(c)
-      } else if (c === 53) {
-        w.push(c)
-      } else if (c%13 === 1) {
-        two.push(c)
-      } else if (c%13 === 0) {
-        one.push(c)
-      } else {
-        other.push(c)
-      }
-    }
-    other.sort((a, b) => a%13 - b%13)
-    data = [...W, ...w, ...two, ...one, ...other]
+    console.log('pushCardNotify', data)
     // this.card_data = data
     this.cur_index_card = data.length - 1
     this.pushCard(data)
@@ -342,69 +325,30 @@ cc.Class({
     this.cards_node.sort(function (x, y) {
       var a = x.getComponent("card").card_data;
       var b = y.getComponent("card").card_data;
-
-      if (a.hasOwnProperty('value') && b.hasOwnProperty('value')) {
-        return b.value - a.value;
-      }
-      if (a.hasOwnProperty('king') && !b.hasOwnProperty('king')) {
-        return -1;
-      }
-      if (!a.hasOwnProperty('king') && b.hasOwnProperty('king')) {
-        return 1;
-      }
-      if (a.hasOwnProperty('king') && b.hasOwnProperty('king')) {
-        return b.king - a.king;
-      }
-    })
-    //这里使用固定坐标，因为取this.cards_node[0].xk可能排序为完成，导致x错误
-    //所以做1000毫秒的延时
-    var x = this.cards_node[0].x;
-    var timeout = 1000
-    setTimeout(function () {
-      //var x = -417.6 
-      console.log("sort x:" + x)
-      for (let i = 0; i < this.cards_node.length; i++) {
-        var card = this.cards_node[i];
-        card.zIndex = i; //设置牌的叠加次序,zindex越大显示在上面
-        card.x = x + card.width * 0.4 * i;
-      }
-    }.bind(this), timeout);
+      return b.value - a.value;
+    }).forEach((e, i) => {
+      e.zIndex = i; //设置牌的叠加次序,zindex越大显示在上面
+    });
   },
   pushCard(data) {
-    if (data) {
-      // data.sort(function (a, b) {
-      //   if (a.hasOwnProperty('value') && b.hasOwnProperty('value')) {
-      //     return b.value - a.value;
-      //   }
-      //   if (a.hasOwnProperty('king') && !b.hasOwnProperty('king')) {
-      //     return -1;
-      //   }
-      //   if (!a.hasOwnProperty('king') && b.hasOwnProperty('king')) {
-      //     return 1;
-      //   }
-      //   if (a.hasOwnProperty('king') && b.hasOwnProperty('king')) {
-      //     return b.king - a.king;
-      //   }
-      // });
-    }
-    //创建card预制体
+    this.cardsNode.removeAllChildren()
+    //创建扑克预制体
     this.cards_node = []
     for (var i = 0; i < data.length; i++) {
-
       var card = cc.instantiate(this.card_prefab)
       card.scale = 0.8
-      // card.parent = this.node.parent
       card.parent = this.cardsNode
-      card.x = card.width * 0.4 * (-0.5) * (-16) + card.width * 0.4 * 0;
-      //这里实现为，每发一张牌，放在已经发的牌最后，然后整体移动
+      card.x = card.width * 0.4 * 0.5 * 16;
       card.y = -250
       card.active = false
-
       card.getComponent("card").showCards(data[i], myglobal.playerData.userId)
       //存储牌的信息,用于后面发牌效果
       this.cards_node.push(card)
       this.card_width = card.width
     }
+
+    this.sortCard()
+
     //创建3张底牌
     this.bottom_card = []
     for (var i = 0; i < 3; i++) {
@@ -449,7 +393,6 @@ cc.Class({
       card.x = last_card_x + ((i + 1) * this.card_width * 0.4)
       card.y = -230  //先把底盘放在-230，在设置个定时器下移到-250的位置
 
-      //console.log("pushThreeCard x:"+card.x)
       card.getComponent("card").showCards(this.bottom_card_data[i], myglobal.playerData.userId)
       card.active = true
       this.cards_node.push(card)

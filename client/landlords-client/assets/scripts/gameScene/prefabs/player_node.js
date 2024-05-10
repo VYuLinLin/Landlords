@@ -1,3 +1,11 @@
+/*
+ * @Author: v vvv@888.com
+ * @Date: 2022-05-09 13:33:49
+ * @LastEditors: v vvv@888.com
+ * @LastEditTime: 2024-05-10 21:44:25
+ * @FilePath: \landlords-client\assets\scripts\gameScene\prefabs\player_node.js
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 import myglobal from "../../mygolbal.js"
 const ddzConsts= require('ddzConstants')
 const ddzData = require('ddzData')
@@ -50,10 +58,8 @@ cc.Class({
     // })
 
     // 给其他玩家发牌事件
-    this.node.on("push_card_event", function (event) {
-      if (this.seat_index === 0) return // 自己不再发牌
-      this.readyimage.active = false
-      this.pushCard()
+    this.node.on("push_card_event", function(){
+      this.pushCard(17)
     }.bind(this))
     // this.node.on("playernode_rob_state_event", function (event) {
     //   // this.node.on("playernode_rob_state_event", function (event) {
@@ -102,14 +108,14 @@ cc.Class({
   start() {
     // 监听游戏状态
     if (!CC_EDITOR) {
-      ddzData.gameStateNotify.addListener(this.gameStateHandler, this)
+      // ddzData.gameStateNotify.addListener(this.gameStateHandler, this)
     }
     window.$socket.on('canrob_notify', this.canrobNotify, this) // 抢地主
     window.$socket.on('gameEndNotify', this.gameEndNotify, this) // 游戏结束
   },
   onDestroy() {
     if (!CC_EDITOR) {
-      ddzData.gameStateNotify.removeListener(this.gameStateHandler, this)
+      // ddzData.gameStateNotify.removeListener(this.gameStateHandler, this)
     }
     window.$socket.remove('canrob_notify', this)
     window.$socket.remove('gameEndNotify', this)
@@ -118,6 +124,7 @@ cc.Class({
   //data玩家节点数据
   //index玩家在房间的位置索引
   init_data(data) {
+    this.playerData = data
     const index = data.seat_index
     //data:{"userId":"2117836","userName":"tiny543","avatarUrl":"http://xxx","coin":1000}
     this.userId = data.id
@@ -137,11 +144,14 @@ cc.Class({
       }
       this.headImage.spriteFrame = spriteFrame;
     }.bind(this));
-    console.log(index)
-    this.updateReadyStatus(data.ready)
     // 更改右边机器人的扑克牌位置
     if (index === 1) {
       this.card_node.x = -this.card_node.x
+    }
+    if (ddzData.gameState < ddzConsts.gameStatus.WAITREADY) {
+      this.updateReadyStatus(data.ready)
+    } else {
+      this.pushCard()
     }
   },
   updateCreator() {
@@ -156,12 +166,6 @@ cc.Class({
   gameStateHandler(state) {
     // 开始游戏 - 已准备
     if (state === ddzConsts.gameStatus.GAMESTART) {
-      // const cards = this.cardlist_node
-      // for (let i = 0; i < cards.length; i++) {
-      //   if (!cards[i]) break
-      //   cards[i].destroy()
-      //   cards.splice(i, 1)
-      // }
       this.cardlist_node = []
       this.card_node.removeAllChildren()
       this.clearOutZone()
@@ -209,7 +213,10 @@ cc.Class({
     this.schedule(callback, 1, seconds)
   },
   // 给机器发牌
-  pushCard() {
+  pushCard(card_count = this.playerData.card_count) {
+    if (this.seat_index === 0) return // 自己不再发牌
+    this.card_node.removeAllChildren()
+    this.readyimage.active = false
     this.card_node.active = true
     // for (var i = 0; i < 17; i++) {
       var card = cc.instantiate(this.card_prefab)
@@ -223,7 +230,7 @@ cc.Class({
     let count = 0;
     card.getChildByName('count').active = true
     const callback = function () {
-      count === 17 && this.unschedule(callback)
+      count === card_count && this.unschedule(callback)
       card.getChildByName('count').getComponent(cc.Label).string = count
       count++;
     }

@@ -50,7 +50,6 @@ const CardsValue = {
   },
 };
 const defines = {
-  serverUrl: 'http://localhost:8528',
   jdRoomConfig: {
     'rate_1': {
       needCostGold: 10,
@@ -76,7 +75,7 @@ const defines = {
   roomNames: ['初级房', '中级房', '高级房', '大师房'],
   // 游戏状态
   gameState: {
-    INVALID: -1, // 无效
+    INVALID: 0, // 无效
     WAITREADY: 1,  //等待游戏
     GAMESTART: 2,  //开始游戏
     PUSHCARD: 3,   //发牌

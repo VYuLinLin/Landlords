@@ -1,11 +1,3 @@
-/*
- * @Author: v vvv@888.com
- * @Date: 2022-05-09 13:33:49
- * @LastEditors: v vvv@888.com
- * @LastEditTime: 2024-05-03 21:53:35
- * @FilePath: \landlords-client\assets\scripts\gameScene\gameScene.js
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 import myglobal from "mygolbal.js"
 import http from "http.js";
 import ws from "websocket.js"
@@ -33,9 +25,7 @@ cc.Class({
   onLoad() {
     this.roomid_label.string = ddzConsts.roomNames[myglobal.playerData.roomId-1] + '：' + myglobal.playerData.tableId
     
-    console.log("game load")
     ws.initWS()
-    console.log("game load end")
 
     this.playerNodeList = []
     if (cc.ws) {
@@ -234,7 +224,7 @@ cc.Class({
       cc.ws = null
     }
     if (!CC_EDITOR) {
-      ddzData.gameStateNotify.removeListener(this.gameStateHandler, this)
+      // ddzData.gameStateNotify.removeListener(this.gameStateHandler, this)
       cc.audioEngine.stopAll()
     }
     // $socket.remove('change_master_notify', this)
@@ -277,7 +267,6 @@ cc.Class({
         const {user_id, creator_id} = e.data
         myglobal.playerData.creator = creator_id
         if (myglobal.playerData.userId === user_id) {
-          ddzData.gameState = ddzConsts.gameStatus.INVALID
           myglobal.playerData.roomId = ''
           cc.sys.localStorage.setItem('userData', JSON.stringify(myglobal.playerData))
           cc.director.loadScene("hallScene")
@@ -305,26 +294,29 @@ cc.Class({
             playerNode.updateReadyStatus(e.data[userId])
           }
         }
-        // ddzData.gameState = ddzConsts.gameStatus.GAMESTART
         break
       case cc.wsApi.playerDeal:
         for (let i = 0; i < this.playerNodeList.length; i++) {
           const node = this.playerNodeList[i]
           if (node.seat_index === 0) {
-            window.$socket.emit('pushcard_notify', e.data)
+            window.$socket.emit('pushcard_notify', e.data.pokers)
           } else {
             //给playernode节点发送事件
             node.emit("push_card_event")
           }
         }
         break
-      case cc.wsApi.tableCallPoints:
+      case cc.wsApi.tableCalling:
+        window.$socket.emit('canrob_notify', e.data)
+        break
+      case cc.wsApi.tableSnatch:
         window.$socket.emit('canrob_notify', e.data)
         break
     }
   },
   getTable() {
     const data = {
+      userId: myglobal.playerData.userId,
       tableId: myglobal.playerData.tableId,
     }
     http.post(http.getTable, data, (res) => {
@@ -335,12 +327,11 @@ cc.Class({
             this.tipNode.parent = this.node;
             return;
         }
-        console.log(res.data)
         const {status, creator, players} = res.data.table
 
         myglobal.playerData.creator = creator.id
         ddzData.gameState = status 
-        
+        this.gameStateHandler(status)
         for (var i = 0; i < this.playerNodeList.length; i++) {
           var node = this.playerNodeList[i]
           node.destroy()
@@ -348,6 +339,7 @@ cc.Class({
         this.playerNodeList = []
         players.map(c => {
           this.addPlayerNode(c)
+          c.cards && c.cards.length && window.$socket.emit('pushcard_notify', c.cards)
         })
     })
   },
@@ -366,7 +358,7 @@ cc.Class({
     }
   },
   gameStateHandler(state) {
-    this.btn_ready.active = ddzData.gameState < ddzConsts.gameStatus.GAMESTART
+    this.btn_ready.active = state < ddzConsts.gameStatus.GAMESTART
     if (state === ddzConsts.gameStatus.WAITREADY) {
       this.btn_ready.active = true
     }
@@ -437,8 +429,10 @@ cc.Class({
     if (index === 0) {
       this.btn_ready.active = !ready // 准备按钮
     }
+    
     var playernode_inst = cc.instantiate(this.player_node_prefabs)
     playernode_inst.parent = this.players_seat_pos.children[index]
+    playernode_inst.seat_index = index
     //创建的节点存储在gamescene的列表中
     this.playerNodeList.push(playernode_inst)
 

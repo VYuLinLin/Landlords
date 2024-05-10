@@ -14,7 +14,7 @@ const start = cc.Class({
       gameRule: new gameRule()
     }
     !CC_EDITOR && ddzData.initData()
-    !CC_EDITOR && ddzServers.initServer()
+    // !CC_EDITOR && ddzServers.initServer()
   }
 })
 module.extends = start

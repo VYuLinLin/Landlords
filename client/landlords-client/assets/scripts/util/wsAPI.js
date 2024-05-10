@@ -54,7 +54,8 @@ export default {
     userUpdate: 'user/update',
     playerReady: 'player/ready',
     playerDeal: 'player/deal', // 玩家发牌
-    tableCallPoints: 'table/callPoints', // 抢地主
+    tableCalling: 'table/calling', // 叫地主
+    tableSnatch: 'table/snatch', // 抢地主
     PlayerCallPoints: 'player/callPoints', // 玩家叫分
 
 }	

@@ -116,12 +116,12 @@ cc.Class({
       "15": 53
     };
 
-    var spriteKey = 'card_' + (card + 1);
-    // if (card.shape) {
-    //   spriteKey = 'card_' + (cardShape[card.shape] * 13 + cardValue[card.value]);
-    // } else {
-    //   spriteKey = 'card_' + kings[card.king];
-    // }
+    let spriteKey = 'card_'
+    if (card.shape === 5) {
+      spriteKey += kings[card.value];
+    } else {
+      spriteKey += (cardShape[card.shape] * 13 + cardValue[card.value]);
+    }
 
     this.node.getComponent(cc.Sprite).spriteFrame = this.cards_sprite_atlas.getSpriteFrame(spriteKey)
     this.setTouchEvent()
